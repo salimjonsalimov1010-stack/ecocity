@@ -201,31 +201,50 @@ function shareQR() {
 }
 
 // ===== MAP =====
-function selectPoint(letter, lx, ly, meters) {
+// SVG city map routes: from А (166,228) to each point
+const ROUTES = {
+  'Б': { mx:47, my:155, path:'M166,228 L166,200 L86,200 L86,170 L62,155', addr:'пр. Дусти, 8', accepts:'Пластик, Стекло, Бумага' },
+  'В': { mx:320, my:165, path:'M166,228 L166,200 L260,200 L260,170 L305,165', addr:'ул. Фирдавси, 22', accepts:'Металл, Электроника' },
+  'Г': { mx:130, my:385, path:'M166,228 L166,295 L86,295 L86,370 L130,385', addr:'ул. Айни, 45', accepts:'Все виды отходов' },
+};
+
+function selectPoint(letter, mx, my, meters, addr, accepts) {
   const km = meters >= 1000 ? (meters/1000).toFixed(1) + ' км' : meters + ' м';
-  const names = {Б:'Пункт Б — Шохмансур, ул. Борбад 42',В:'Пункт В — Сино, ул. Айни 8',Г:'Пункт Г — Авиценна, пр. Рудаки 15'};
-  const accepts = {Б:'Пластик, Металл',В:'Все виды отходов',Г:'Электроника, Батарейки'};
+  const walkMin = Math.ceil(meters / 80);
+  const r = ROUTES[letter];
+
+  // Draw route on SVG
+  const routePath = document.getElementById('svg-route');
+  if (routePath) {
+    routePath.setAttribute('d', r ? r.path : '');
+    routePath.style.display = 'block';
+    // Animate dash offset
+    routePath.style.strokeDashoffset = '200';
+    routePath.style.transition = 'stroke-dashoffset 0s';
+    setTimeout(() => {
+      routePath.style.transition = 'stroke-dashoffset 1.2s ease';
+      routePath.style.strokeDashoffset = '0';
+    }, 50);
+  }
+
   const panel = document.getElementById('map-panel');
   document.getElementById('mp-content').innerHTML = `
-    <h4 style="margin-bottom:8px">🗑️ ${names[letter]}</h4>
-    <p style="color:#6b7c6b;font-size:13px;margin-bottom:6px"><i class="fas fa-route" style="color:#1a6b3c"></i> Расстояние от вас (А): <strong>${km}</strong></p>
-    <p style="color:#6b7c6b;font-size:13px"><i class="fas fa-recycle" style="color:#1a6b3c"></i> Принимает: ${accepts[letter]}</p>
+    <h4 style="margin-bottom:10px;font-size:16px">🗑️ Пункт ${letter} — ${addr || 'Душанбе'}</h4>
+    <div style="display:flex;gap:10px;margin-bottom:8px">
+      <div style="flex:1;background:#e8f5e9;border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:20px;font-weight:900;color:#1a6b3c">${km}</div>
+        <div style="font-size:11px;color:#6b7c6b">Расстояние</div>
+      </div>
+      <div style="flex:1;background:#e3f2fd;border-radius:10px;padding:10px;text-align:center">
+        <div style="font-size:20px;font-weight:900;color:#2980b9">${walkMin} мин</div>
+        <div style="font-size:11px;color:#6b7c6b">Пешком</div>
+      </div>
+    </div>
+    <p style="color:#6b7c6b;font-size:13px"><i class="fas fa-recycle" style="color:#1a6b3c;margin-right:6px"></i>Принимает: <strong>${accepts || 'Все виды'}</strong></p>
+    <p style="color:#6b7c6b;font-size:12px;margin-top:4px"><i class="fas fa-clock" style="color:#f39c12;margin-right:6px"></i>Режим работы: 08:00 – 20:00</p>
   `;
+  document.getElementById('btn-route').innerHTML = `<i class="fas fa-check-circle"></i> Маршрут до точки ${letter} построен`;
   panel.classList.remove('hidden');
-  drawRoute(50, 45, lx, ly);
-  document.getElementById('btn-route').innerHTML = `<i class="fas fa-check-circle"></i> Маршрут до точки ${letter} — ${km}`;
-}
-
-function drawRoute(ax, ay, bx, by) {
-  const svg = document.getElementById('route-svg');
-  const map = document.getElementById('demo-map');
-  const w = map.offsetWidth, h = map.offsetHeight;
-  const x1 = w * ax / 100, y1 = h * ay / 100;
-  const x2 = w * bx / 100, y2 = h * by / 100;
-  svg.innerHTML = `
-    <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1a6b3c"/></marker></defs>
-    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#1a6b3c" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#arr)" opacity="0.85"/>
-  `;
 }
 
 // ===== NEWS =====
