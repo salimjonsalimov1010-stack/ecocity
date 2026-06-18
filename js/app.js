@@ -1,198 +1,87 @@
-// ===== EcoCity Main Application =====
+// ===== EcoCity App =====
+let user = null;
+let regTemp = {};
 
-let currentUser = null;
-let map = null;
-let userMarker = null;
-let routingControl = null;
-let selectedPoint = null;
-let allMarkers = [];
-let regData = {};
+const LEVELS = [
+  {n:1,name:'Эко Новичок',icon:'🌱',min:0,max:100},
+  {n:2,name:'Эко Помощник',icon:'🌿',min:100,max:300},
+  {n:3,name:'Эко Воин',icon:'♻️',min:300,max:600},
+  {n:4,name:'Эко Чемпион',icon:'🌍',min:600,max:1000},
+  {n:5,name:'Эко Легенда',icon:'👑',min:1000,max:99999},
+];
 
-// ===== INIT =====
+const TIPS = ['Сортируйте мусор — получайте ×2 бонусы!','Пластик → в синий контейнер, стекло → в зелёный','Батарейки только в специальные пункты!','Каждый пакет с QR кодом = автоматические бонусы','Приглашайте друзей — получайте 50 EcoCoin'];
+
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
-    hideSplash();
-    checkSession();
-  }, 2500);
-});
-
-function hideSplash() {
-  const splash = document.getElementById('splash-screen');
-  splash.style.transition = 'opacity .5s ease';
-  splash.style.opacity = '0';
-  setTimeout(() => splash.classList.add('hidden'), 500);
-}
-
-function checkSession() {
-  const saved = localStorage.getItem('ecocity_user');
-  if (saved) {
-    currentUser = JSON.parse(saved);
-    openApp();
-  } else {
-    const seen = localStorage.getItem('ecocity_onboard');
-    if (seen) showAuth();
-    else showOnboarding();
-  }
-}
-
-// ===== ONBOARDING =====
-let currentSlide = 0;
-function showOnboarding() {
-  document.getElementById('onboarding').classList.remove('hidden');
-}
-
-document.getElementById('onboard-next').addEventListener('click', () => {
-  const slides = document.querySelectorAll('.onboard-slide');
-  const dots = document.querySelectorAll('.onboard-dots .dot');
-  if (currentSlide < slides.length - 1) {
-    slides[currentSlide].classList.remove('active');
-    dots[currentSlide].classList.remove('active');
-    currentSlide++;
-    slides[currentSlide].classList.add('active');
-    dots[currentSlide].classList.add('active');
-    if (currentSlide === slides.length - 1) {
-      document.getElementById('onboard-next').innerHTML = 'Начать <i class="fas fa-arrow-right"></i>';
-    }
-  } else {
-    localStorage.setItem('ecocity_onboard', '1');
-    document.getElementById('onboarding').classList.add('hidden');
-    showAuth();
-  }
+    document.getElementById('splash-screen').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('splash-screen').classList.add('hidden');
+      const saved = localStorage.getItem('eco_user');
+      if (saved) { user = JSON.parse(saved); openApp(); }
+      else { document.getElementById('auth-page').classList.remove('hidden'); }
+    }, 400);
+  }, 1800);
 });
 
 // ===== AUTH =====
-function showAuth() {
-  document.getElementById('auth-page').classList.remove('hidden');
-  showAuthScreen('welcome');
-}
-
-function showAuthScreen(name) {
+function showScreen(name) {
   document.querySelectorAll('.auth-screen').forEach(s => s.classList.remove('active'));
-  const map_ = { welcome:'auth-welcome', register:'auth-register', passport:'auth-passport', confirm:'auth-confirm', login:'auth-login', otp:'auth-otp' };
-  const el = document.getElementById(map_[name]);
-  if (el) el.classList.add('active');
+  document.getElementById('auth-' + name).classList.add('active');
 }
 
-function updatePhoneCode() {
-  const sel = document.getElementById('reg-country');
-  const code = sel.value;
-  document.getElementById('phone-code').textContent = code;
-}
-
-function regStep1() {
-  const phone = document.getElementById('reg-phone').value.trim();
-  const city = document.getElementById('reg-city').value;
-  if (!phone || phone.length < 7) { showToast('Введите корректный номер телефона', 'error'); return; }
-  const code = document.getElementById('phone-code').textContent;
-  regData.phone = code + ' ' + phone;
-  regData.city = city;
-  document.getElementById('otp-phone-display').textContent = regData.phone;
-  showAuthScreen('otp');
-}
-
-function verifyOTP() {
-  const inputs = document.querySelectorAll('.otp-input');
-  const code = Array.from(inputs).map(i => i.value).join('');
-  if (code === '1234' || code.length === 4) {
-    showToast('Номер подтверждён! ✓', 'success');
-    showAuthScreen('passport');
-  } else {
-    showToast('Неверный код. Попробуйте 1234', 'error');
-  }
-}
-
-function otpMove(el, idx) {
+function otpNext(el, i) {
   if (el.value.length >= 1) {
-    const inputs = document.querySelectorAll('.otp-input');
-    if (idx < inputs.length - 1) inputs[idx + 1].focus();
+    const boxes = document.querySelectorAll('.otp-box');
+    if (i < boxes.length - 1) boxes[i+1].focus();
   }
 }
 
-function regStep2() {
-  const passport = document.getElementById('reg-passport').value.trim();
-  const first = document.getElementById('reg-firstname').value.trim();
-  const last = document.getElementById('reg-lastname').value.trim();
-  const dob = document.getElementById('reg-dob').value;
-  if (!passport || passport.length < 5) { showToast('Введите номер паспорта / ID', 'error'); return; }
-  if (!first || !last) { showToast('Введите имя и фамилию', 'error'); return; }
-  if (!dob) { showToast('Введите дату рождения', 'error'); return; }
-
-  regData.passport = passport;
-  regData.firstName = first;
-  regData.lastName = last;
-  regData.dob = dob;
-
-  const status = document.getElementById('verify-status');
-  status.style.display = 'flex';
-
+function doVerify() {
+  const first = document.getElementById('reg-first').value.trim();
+  const last = document.getElementById('reg-last').value.trim();
+  if (!first || !last) { toast('Введите имя и фамилию', 'error'); return; }
+  regTemp.firstName = first; regTemp.lastName = last;
+  document.getElementById('verify-anim').classList.remove('hidden');
   setTimeout(() => {
-    status.style.display = 'none';
+    document.getElementById('verify-anim').classList.add('hidden');
     document.getElementById('verified-name').textContent = first + ' ' + last;
-    showToast('Верификация успешна! ✓', 'success');
-    showAuthScreen('confirm');
-  }, 2500);
+    toast('Демо-верификация пройдена ✓', 'success');
+    showScreen('register-3');
+  }, 2000);
 }
 
-function regComplete() {
+function doRegister() {
   const pass = document.getElementById('reg-pass').value;
   const pass2 = document.getElementById('reg-pass2').value;
-  if (!pass || pass.length < 6) { showToast('Пароль должен содержать минимум 6 символов', 'error'); return; }
-  if (pass !== pass2) { showToast('Пароли не совпадают', 'error'); return; }
-  if (!document.getElementById('agree-terms').checked) { showToast('Примите условия использования', 'error'); return; }
-
+  if (pass.length < 6) { toast('Пароль минимум 6 символов', 'error'); return; }
+  if (pass !== pass2) { toast('Пароли не совпадают', 'error'); return; }
   const uid = 'ECO-' + Math.floor(100000 + Math.random() * 900000);
-  const qrData = generateQRData(uid);
-
-  currentUser = {
-    uid, firstName: regData.firstName, lastName: regData.lastName,
-    phone: regData.phone, city: regData.city, passport: regData.passport,
-    dob: regData.dob, password: pass, qrData,
-    coins: 10, bags: 0, level: 1, streak: 1,
-    joinDate: new Date().toLocaleDateString('ru'), dailyClaimed: false,
-    history: [], earnedAchievements: [],
-    notifications: 3
+  user = {
+    uid, firstName: regTemp.firstName || 'Эко', lastName: regTemp.lastName || 'Пользователь',
+    city: document.getElementById('reg-city')?.value || 'Душанбе',
+    coins: 10, bags: 0, streak: 1, dailyClaimed: false,
+    history: [], achievements: [], joinDate: new Date().toLocaleDateString('ru')
   };
   saveUser();
-  showToast('Аккаунт EcoCity создан! 🎉', 'success');
-  setTimeout(() => { document.getElementById('auth-page').classList.add('hidden'); openApp(); }, 800);
-}
-
-function doLogin() {
-  const phone = document.getElementById('login-phone').value.trim();
-  const pass = document.getElementById('login-pass').value;
-  const saved = localStorage.getItem('ecocity_user');
-  if (saved) {
-    const u = JSON.parse(saved);
-    if ((phone && pass && u.password === pass) || (!phone && !pass)) {
-      currentUser = u;
-      document.getElementById('auth-page').classList.add('hidden');
-      openApp();
-    } else {
-      showToast('Неверный телефон или пароль', 'error');
-    }
-  } else {
-    showToast('Аккаунт не найден. Зарегистрируйтесь', 'error');
-  }
+  document.getElementById('auth-page').classList.add('hidden');
+  openApp();
+  toast('Добро пожаловать в EcoCity! 🎉', 'success');
 }
 
 function demoLogin() {
-  const uid = 'ECO-DEMO01';
-  currentUser = {
-    uid, firstName:'Эко', lastName:'Гражданин',
-    phone:'+992 90 123 4567', city:'Душанбе',
-    passport:'A 1234567', dob:'1995-01-01',
-    qrData: generateQRData(uid),
-    coins: 245, bags: 18, level: 2, streak: 5,
-    joinDate:'01.06.2026', dailyClaimed: false,
+  user = {
+    uid: 'ECO-DEMO01', firstName: 'Салимжон', lastName: 'Салимов',
+    city: 'Душанбе', coins: 245, bags: 18, streak: 5, dailyClaimed: false,
     history: [
-      { date:'15.06.2026', bags:3, coins:30, point:'Центральный пункт' },
-      { date:'12.06.2026', bags:5, coins:50, point:'Пункт №2 — Шохмансур' },
-      { date:'10.06.2026', bags:2, coins:20, point:'Завод переработки' },
-      { date:'08.06.2026', bags:4, coins:40, point:'Пункт №3 — Сино' },
-      { date:'05.06.2026', bags:4, coins:40, point:'Центральный пункт' },
+      {date:'15.06.2026',bags:3,coins:30,point:'Пункт Б — Шохмансур'},
+      {date:'12.06.2026',bags:5,coins:50,point:'Пункт В — Сино'},
+      {date:'10.06.2026',bags:4,coins:40,point:'Пункт Г — Авиценна'},
+      {date:'08.06.2026',bags:2,coins:20,point:'Пункт Б — Шохмансур'},
+      {date:'05.06.2026',bags:4,coins:40,point:'Завод переработки'},
     ],
-    earnedAchievements: ['first_bag','bags_10','coins_100'],
-    notifications: 3
+    achievements: ['first_bag','bags_10','coins_100'],
+    joinDate: '01.06.2026'
   };
   saveUser();
   document.getElementById('auth-page').classList.add('hidden');
@@ -200,507 +89,389 @@ function demoLogin() {
 }
 
 function doLogout() {
-  if (!confirm('Выйти из аккаунта EcoCity?')) return;
-  currentUser = null;
+  if (!confirm('Выйти из аккаунта?')) return;
+  user = null;
   document.getElementById('main-app').classList.add('hidden');
   document.getElementById('auth-page').classList.remove('hidden');
-  showAuthScreen('welcome');
+  showScreen('welcome');
 }
 
-// ===== APP OPEN =====
+function saveUser() { localStorage.setItem('eco_user', JSON.stringify(user)); }
+
+// ===== APP =====
 function openApp() {
   document.getElementById('main-app').classList.remove('hidden');
   updateUI();
   renderNews();
   renderAchievements();
   renderScanHistory();
-  renderNotifications();
-  initMap();
-  generateQRCode();
-  setEcoTip();
-  updateGreeting();
+  renderNotifs();
+  renderLeaderboard();
+  renderCompetition('city');
+  generateQR();
+  updateLevelTable();
+  document.getElementById('tip-txt').textContent = TIPS[Math.floor(Math.random() * TIPS.length)];
 }
 
-function saveUser() {
-  localStorage.setItem('ecocity_user', JSON.stringify(currentUser));
-}
-
-function generateQRData(uid) {
-  return `ECOCITY|${uid}|${Date.now()}|${Math.random().toString(36).substr(2,9).toUpperCase()}`;
-}
-
-// ===== UI UPDATE =====
-function updateUI() {
-  if (!currentUser) return;
-  const name = currentUser.firstName + ' ' + currentUser.lastName;
-  const initials = (currentUser.firstName[0] || 'Э') + (currentUser.lastName[0] || 'Г');
-  const level = getLevelInfo(currentUser.coins);
-
-  // Header
-  document.getElementById('header-city').textContent = currentUser.city || 'Душанбе';
-  document.getElementById('header-coins').textContent = currentUser.coins;
-  document.getElementById('notif-badge').textContent = currentUser.notifications || 0;
-
-  // Hero
-  document.getElementById('hero-name').textContent = currentUser.firstName;
-  document.getElementById('stat-bags').textContent = currentUser.bags;
-  document.getElementById('stat-coins').textContent = currentUser.coins;
-  document.getElementById('stat-level-num').textContent = level.level;
-  document.getElementById('hero-level-badge').innerHTML = `<i class="fas fa-leaf"></i> <span>${level.name}</span>`;
-
-  // Level progress
-  const progress = getProgress(currentUser.coins, level);
-  document.getElementById('level-progress-bar').style.width = progress + '%';
-  document.getElementById('level-current-name').textContent = level.name;
-  const nextLv = LEVELS[level.level] || level;
-  document.getElementById('level-next-name').textContent = level.level < LEVELS.length ? '→ ' + LEVELS[level.level].name : '→ Макс. уровень';
-  document.getElementById('coins-to-next').textContent = level.level < LEVELS.length ? level.maxCoins - currentUser.coins : 0;
-
-  // QR page
-  document.getElementById('qr-avatar').textContent = initials;
-  document.getElementById('qr-user-name').textContent = name;
-  document.getElementById('qr-user-id').textContent = 'ID: ' + currentUser.uid;
-  document.getElementById('qr-city').textContent = currentUser.city + ', Центральная Азия';
-  document.getElementById('qr-coins').textContent = currentUser.coins;
-
-  // Profile
-  document.getElementById('profile-avatar').textContent = initials;
-  document.getElementById('profile-name').textContent = name;
-  document.getElementById('profile-id').textContent = 'ID: ' + currentUser.uid;
-  document.getElementById('profile-level-badge').innerHTML = `<i class="fas fa-leaf"></i> ${level.name}`;
-  document.getElementById('prof-bags').textContent = currentUser.bags;
-  document.getElementById('prof-coins').textContent = currentUser.coins;
-  document.getElementById('prof-level').textContent = level.level;
-  document.getElementById('prof-rank').textContent = '#' + Math.floor(10 + Math.random() * 90);
-  document.getElementById('prof-level-text').textContent = level.name;
-  document.getElementById('prof-progress').style.width = progress + '%';
-  document.getElementById('prof-xp').textContent = currentUser.coins;
-  document.getElementById('prof-xp-max').textContent = level.maxCoins;
-}
-
-function getLevelInfo(coins) {
-  for (let i = LEVELS.length - 1; i >= 0; i--) {
-    if (coins >= LEVELS[i].minCoins) return LEVELS[i];
-  }
+function getLvl(coins) {
+  for (let i = LEVELS.length-1; i >= 0; i--) if (coins >= LEVELS[i].min) return LEVELS[i];
   return LEVELS[0];
 }
 
-function getProgress(coins, level) {
-  const range = level.maxCoins - level.minCoins;
-  const current = coins - level.minCoins;
-  return Math.min(100, Math.round((current / range) * 100));
+function getProgress(coins, lv) {
+  if (lv.n === 5) return 100;
+  return Math.min(100, Math.round(((coins - lv.min) / (lv.max - lv.min)) * 100));
 }
 
-function updateGreeting() {
+function updateUI() {
+  if (!user) return;
+  const lv = getLvl(user.coins);
+  const prog = getProgress(user.coins, lv);
+  const name = user.firstName + ' ' + user.lastName;
+  const initials = (user.firstName[0]||'Э') + (user.lastName[0]||'Г');
+  const nextLv = LEVELS[lv.n] || lv;
+  const coinsLeft = lv.n < 5 ? lv.max - user.coins : 0;
+
+  document.getElementById('h-city').textContent = user.city || 'Душанбе';
+  document.getElementById('h-coins').textContent = user.coins;
   const h = new Date().getHours();
-  let g = h < 12 ? 'Доброе утро' : h < 18 ? 'Добрый день' : 'Добрый вечер';
-  document.getElementById('hero-greeting').innerHTML = `${g}, <strong>${currentUser.firstName}</strong>!`;
+  const greet = h<12?'Доброе утро':h<18?'Добрый день':'Добрый вечер';
+  document.getElementById('hero-greet').innerHTML = `${greet}, <strong>${user.firstName}</strong>!`;
+  document.getElementById('s-bags').textContent = user.bags;
+  document.getElementById('s-coins').textContent = user.coins;
+  document.getElementById('s-lvl').textContent = lv.n;
+  document.getElementById('hero-lvl-tag').innerHTML = `${lv.icon} ${lv.name}`;
+  document.getElementById('lv-cur').textContent = lv.name;
+  document.getElementById('lv-nxt').textContent = lv.n < 5 ? '→ ' + nextLv.name : '→ Макс.';
+  document.getElementById('pbar-fill').style.width = prog + '%';
+  document.getElementById('lv-hint').textContent = lv.n < 5 ? coinsLeft + ' EcoCoin до следующего уровня' : 'Максимальный уровень!';
+
+  // QR
+  document.getElementById('qr-av').textContent = initials;
+  document.getElementById('qr-name').textContent = name;
+  document.getElementById('qr-id').textContent = user.uid;
+  document.getElementById('qr-city-txt').textContent = user.city + ', Центральная Азия';
+  document.getElementById('qr-coins-val').textContent = user.coins;
+
+  // Profile
+  document.getElementById('prof-av').textContent = initials;
+  document.getElementById('prof-name').textContent = name;
+  document.getElementById('prof-id-txt').textContent = 'ID: ' + user.uid;
+  document.getElementById('prof-lvl-tag').textContent = lv.icon + ' ' + lv.name;
+  document.getElementById('p-bags').textContent = user.bags;
+  document.getElementById('p-coins').textContent = user.coins;
+  document.getElementById('p-lvl').textContent = lv.n;
+  document.getElementById('p-lv-cur').textContent = lv.name;
+  document.getElementById('p-lv-nxt').textContent = lv.n < 5 ? '→ ' + nextLv.name : '→ Макс.';
+  document.getElementById('p-pbar').style.width = prog + '%';
+  document.getElementById('p-xp').textContent = user.coins;
+  document.getElementById('p-xp-max').textContent = lv.max < 99999 ? lv.max : '∞';
 }
 
-function setEcoTip() {
-  const tip = ECO_TIPS[Math.floor(Math.random() * ECO_TIPS.length)];
-  document.getElementById('eco-tip-text').textContent = tip;
+function updateLevelTable() {
+  if (!user) return;
+  const lv = getLvl(user.coins);
+  LEVELS.forEach(l => {
+    const el = document.getElementById('lt-' + l.n);
+    if (!el) return;
+    el.classList.remove('active-level');
+    if (l.n === lv.n) el.classList.add('active-level');
+  });
+}
+
+// ===== QR =====
+function generateQR() {
+  if (!user) return;
+  drawQR('qr-canvas', user.uid + '|' + user.firstName + '|' + user.city);
+}
+
+function downloadQR() {
+  const canvas = document.getElementById('qr-canvas');
+  const link = document.createElement('a');
+  link.download = 'EcoCity_QR_' + user.uid + '.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  toast('QR-код скачан! ✅', 'success');
+}
+
+function shareQR() {
+  const text = `Мой EcoCity QR-код\nID: ${user.uid}\nСкачайте EcoCity и начните зарабатывать бонусы за мусор!`;
+  if (navigator.share) navigator.share({title:'EcoCity QR', text});
+  else { navigator.clipboard.writeText(user.uid); toast('ID скопирован: ' + user.uid, 'success'); }
+}
+
+// ===== MAP =====
+function selectPoint(letter, lx, ly, meters) {
+  const km = meters >= 1000 ? (meters/1000).toFixed(1) + ' км' : meters + ' м';
+  const names = {Б:'Пункт Б — Шохмансур, ул. Борбад 42',В:'Пункт В — Сино, ул. Айни 8',Г:'Пункт Г — Авиценна, пр. Рудаки 15'};
+  const accepts = {Б:'Пластик, Металл',В:'Все виды отходов',Г:'Электроника, Батарейки'};
+  const panel = document.getElementById('map-panel');
+  document.getElementById('mp-content').innerHTML = `
+    <h4 style="margin-bottom:8px">🗑️ ${names[letter]}</h4>
+    <p style="color:#6b7c6b;font-size:13px;margin-bottom:6px"><i class="fas fa-route" style="color:#1a6b3c"></i> Расстояние от вас (А): <strong>${km}</strong></p>
+    <p style="color:#6b7c6b;font-size:13px"><i class="fas fa-recycle" style="color:#1a6b3c"></i> Принимает: ${accepts[letter]}</p>
+  `;
+  panel.classList.remove('hidden');
+  drawRoute(50, 45, lx, ly);
+  document.getElementById('btn-route').innerHTML = `<i class="fas fa-check-circle"></i> Маршрут до точки ${letter} — ${km}`;
+}
+
+function drawRoute(ax, ay, bx, by) {
+  const svg = document.getElementById('route-svg');
+  const map = document.getElementById('demo-map');
+  const w = map.offsetWidth, h = map.offsetHeight;
+  const x1 = w * ax / 100, y1 = h * ay / 100;
+  const x2 = w * bx / 100, y2 = h * by / 100;
+  svg.innerHTML = `
+    <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#1a6b3c"/></marker></defs>
+    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#1a6b3c" stroke-width="3" stroke-dasharray="8,4" marker-end="url(#arr)" opacity="0.85"/>
+  `;
 }
 
 // ===== NEWS =====
 function renderNews() {
-  const container = document.getElementById('news-list');
-  container.innerHTML = ECO_NEWS.map(n => `
-    <div class="news-card" onclick="showToast('📰 ${n.title}')">
-      <div class="news-card-img" style="background:${n.color}">${n.emoji}</div>
-      <div class="news-card-body">
-        <div class="news-tag">🌿 ${n.tag}</div>
+  document.getElementById('news-wrap').innerHTML = NEWS_DATA.map(n => `
+    <div class="news-card">
+      <div class="news-img" style="background:${n.bg}">${n.emoji}</div>
+      <div class="news-body">
+        <div class="news-tag">${n.tag}</div>
         <h4>${n.title}</h4>
         <p>${n.text}</p>
-        <div class="news-meta">
-          <span><i class="fas fa-clock"></i> ${n.date}</span>
-          <span><i class="fas fa-share-alt"></i> Поделиться</span>
-        </div>
+        <div class="news-meta"><span><i class="fas fa-clock"></i> ${n.date}</span></div>
       </div>
     </div>
   `).join('');
 }
 
 // ===== ACHIEVEMENTS =====
+const ACHS = [
+  {id:'first_bag',icon:'🌱',name:'Первый шаг',desc:'1 пакет'},
+  {id:'bags_10',icon:'🗑️',name:'10 пакетов',desc:'10 пакетов'},
+  {id:'bags_50',icon:'♻️',name:'50 пакетов',desc:'50 пакетов'},
+  {id:'coins_100',icon:'💰',name:'100 монет',desc:'100 EcoCoin'},
+  {id:'level_3',icon:'⭐',name:'Уровень 3',desc:'3-й уровень'},
+  {id:'legend',icon:'👑',name:'Легенда',desc:'1000 EcoCoin'},
+];
 function renderAchievements() {
-  const container = document.getElementById('achievements-row');
-  container.innerHTML = ACHIEVEMENTS.map(a => {
-    const earned = currentUser.earnedAchievements && currentUser.earnedAchievements.includes(a.id);
-    return `
-      <div class="achievement-card ${earned ? '' : 'locked'}" onclick="showToast('${a.icon} ${a.name}: ${a.desc}')">
-        <div class="ach-icon">${a.icon}</div>
-        <div class="ach-name">${a.name}</div>
-        <div class="ach-desc">${a.desc}</div>
-        ${earned ? '<div class="ach-earned">✓ Получено</div>' : '<div class="ach-desc">🔒</div>'}
-      </div>
-    `;
+  document.getElementById('ach-row').innerHTML = ACHS.map(a => {
+    const earned = user?.achievements?.includes(a.id);
+    return `<div class="ach-card ${earned?'':'locked'}" onclick="toast('${a.icon} ${a.name}: ${a.desc}')">
+      <div class="ach-ico">${a.icon}</div>
+      <div class="ach-nm">${a.name}</div>
+      <div class="ach-ds">${earned?'✓ Получено':'🔒 '+a.desc}</div>
+    </div>`;
   }).join('');
 }
 
-// ===== MAP =====
-function initMap() {
-  if (map) return;
-  const dushanbe = [38.5598, 68.7870];
-  map = L.map('map', { zoomControl:false, attributionControl:true }).setView(dushanbe, 14);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution:'© OpenStreetMap',
-    maxZoom:19
-  }).addTo(map);
-
-  L.control.zoom({ position:'bottomright' }).addTo(map);
-
-  // User marker
-  const userIcon = L.divIcon({
-    html:`<div class="eco-marker user"><i class="fas fa-street-view" style="color:#fff;font-size:16px"></i></div>`,
-    className:'', iconSize:[36,36], iconAnchor:[18,18]
-  });
-  userMarker = L.marker(dushanbe, { icon:userIcon }).addTo(map);
-  userMarker.bindPopup('<b>📍 Вы здесь</b><br>Душанбе, Таджикистан').openPopup();
-
-  // Trash/factory markers
-  TRASH_POINTS.forEach(p => addMapMarker(p));
-
-  setTimeout(() => map.invalidateSize(), 300);
-}
-
-function addMapMarker(point) {
-  const isFactory = point.type === 'factory';
-  const icon = L.divIcon({
-    html:`<div class="eco-marker ${isFactory ? 'factory' : 'trash'}">
-      <i class="fas ${isFactory ? 'fa-industry' : 'fa-trash-alt'}" style="color:#fff;font-size:14px"></i>
-    </div>`,
-    className:'', iconSize:[36,36], iconAnchor:[18,18]
-  });
-  const marker = L.marker([point.lat, point.lng], { icon }).addTo(map);
-  marker.pointData = point;
-  marker.on('click', () => showMapPanel(point));
-  allMarkers.push({ marker, type:point.type });
-}
-
-function showMapPanel(point) {
-  selectedPoint = point;
-  const panel = document.getElementById('map-panel');
-  const content = document.getElementById('map-panel-content');
-  const isFactory = point.type === 'factory';
-  content.innerHTML = `
-    <h4>${isFactory ? '🏭' : '🗑️'} ${point.name}</h4>
-    <p><i class="fas fa-map-marker-alt" style="color:#e74c3c;margin-right:6px"></i>${point.address}</p>
-    <p><i class="fas fa-clock" style="color:#2980b9;margin-right:6px"></i>Часы работы: ${point.hours}</p>
-    <div class="map-panel-badges">
-      <span class="map-badge open">✓ Открыто</span>
-      <span class="map-badge type">${isFactory ? '🏭 Завод' : '♻️ Сбор'}</span>
-      ${point.accepts.map(a => `<span class="map-badge type">${a}</span>`).join('')}
-    </div>
-  `;
-  panel.style.display = 'block';
-}
-
-function buildRoute() {
-  if (!selectedPoint) return;
-  const dushanbe = [38.5598, 68.7870];
-  if (routingControl) { map.removeControl(routingControl); routingControl = null; }
-  try {
-    routingControl = L.Routing.control({
-      waypoints: [L.latLng(dushanbe), L.latLng(selectedPoint.lat, selectedPoint.lng)],
-      routeWhileDragging:false,
-      show:false,
-      lineOptions:{ styles:[{ color:'#1a6b3c', weight:5, opacity:.8 }] },
-      createMarker:() => null,
-      router: L.Routing.osrmv1({ serviceUrl:'https://router.project-osrm.org/route/v1' })
-    }).addTo(map);
-    map.setView([selectedPoint.lat, selectedPoint.lng], 15);
-    showToast('🗺️ Маршрут построен!', 'success');
-    document.getElementById('map-panel').style.display = 'none';
-  } catch(e) {
-    showToast('Маршрут построен (демо)', 'success');
-  }
-}
-
-function locateUser() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        const ll = [pos.coords.latitude, pos.coords.longitude];
-        map.setView(ll, 16);
-        if (userMarker) userMarker.setLatLng(ll);
-        showToast('📍 Местоположение найдено', 'success');
-      },
-      () => {
-        map.setView([38.5598, 68.7870], 14);
-        showToast('📍 Показываем Душанбе', 'success');
-      }
-    );
-  } else {
-    map.setView([38.5598, 68.7870], 14);
-  }
-}
-
-function filterMarkers(type) {
-  document.querySelectorAll('[id^="filter-"]').forEach(b => b.classList.remove('active'));
-  document.getElementById('filter-' + type).classList.add('active');
-  allMarkers.forEach(m => {
-    if (type === 'all' || m.type === type) {
-      m.marker.addTo(map);
-    } else {
-      map.removeLayer(m.marker);
-    }
-  });
-}
-
-// ===== QR CODE =====
-function generateQRCode() {
-  const container = document.getElementById('qr-canvas');
-  container.innerHTML = '';
-  if (!currentUser) return;
-  try {
-    new QRCode(container, {
-      text: currentUser.qrData || currentUser.uid,
-      width: 200, height: 200,
-      colorDark:'#1a2e1a', colorLight:'#ffffff',
-      correctLevel: QRCode.CorrectLevel.H
-    });
-  } catch(e) {
-    container.innerHTML = '<div style="width:200px;height:200px;display:flex;align-items:center;justify-content:center;background:#f0f4f0;border-radius:12px;font-size:60px;">📱</div>';
-  }
-}
-
-function downloadQR() {
-  const canvas = document.querySelector('#qr-canvas canvas');
-  if (canvas) {
-    const a = document.createElement('a');
-    a.download = 'EcoCity_QR_' + (currentUser ? currentUser.uid : '') + '.png';
-    a.href = canvas.toDataURL();
-    a.click();
-    showToast('✅ QR-код скачан!', 'success');
-  } else {
-    showToast('QR-код готов к использованию', 'success');
-  }
-}
-
-function shareQR() {
-  if (navigator.share) {
-    navigator.share({ title:'Мой EcoCity QR-код', text:`ID: ${currentUser.uid}\nEcoCity — умная переработка мусора`, url:window.location.href });
-  } else {
-    navigator.clipboard.writeText(currentUser.uid).then(() => showToast('ID скопирован: ' + currentUser.uid, 'success'));
-  }
+function checkAchievements() {
+  if (!user.achievements) user.achievements = [];
+  const add = (id,cond) => { if(cond && !user.achievements.includes(id)) { user.achievements.push(id); const a=ACHS.find(x=>x.id===id); if(a) setTimeout(()=>toast(`🏆 Достижение: ${a.name} ${a.icon}`,'gold'),500); } };
+  add('first_bag', user.bags >= 1);
+  add('bags_10', user.bags >= 10);
+  add('bags_50', user.bags >= 50);
+  add('coins_100', user.coins >= 100);
+  add('level_3', getLvl(user.coins).n >= 3);
+  add('legend', user.coins >= 1000);
+  renderAchievements();
+  updateLevelTable();
 }
 
 // ===== SCAN HISTORY =====
 function renderScanHistory() {
-  const container = document.getElementById('scan-history');
-  if (!currentUser || !currentUser.history || currentUser.history.length === 0) {
-    container.innerHTML = '<div style="text-align:center;padding:30px;color:#6b7c6b;font-size:14px"><i class="fas fa-inbox" style="font-size:40px;display:block;margin-bottom:10px;opacity:.3"></i>История сканирований пуста.<br>Начните сдавать мусор!</div>';
+  const c = document.getElementById('scan-hist');
+  if (!user?.history?.length) {
+    c.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>История пуста. Начните сдавать мусор!</p></div>';
     return;
   }
-  container.innerHTML = currentUser.history.map(h => `
-    <div class="scan-history-item">
-      <div class="scan-icon"><i class="fas fa-qrcode"></i></div>
-      <div class="scan-info">
-        <strong>${h.point}</strong>
-        <small>${h.date} · ${h.bags} пакет${h.bags>1?'ов':''}</small>
-      </div>
-      <span class="scan-coins">+${h.coins} <i class="fas fa-coins" style="font-size:12px;color:#f39c12"></i></span>
+  c.innerHTML = user.history.map(h => `
+    <div class="sh-item">
+      <div class="sh-ico"><i class="fas fa-qrcode"></i></div>
+      <div class="sh-info"><strong>${h.point}</strong><small>${h.date} · ${h.bags} пакет${h.bags>1?'ов':''}</small></div>
+      <span class="sh-coins">+${h.coins} <i class="fas fa-coins"></i></span>
     </div>
   `).join('');
-}
-
-// ===== NOTIFICATIONS =====
-function renderNotifications() {
-  const list = document.getElementById('notifications-list');
-  list.innerHTML = NOTIFICATIONS_DATA.map(n => `
-    <div class="notif-item">
-      <div class="notif-icon" style="background:${n.bg}">${n.icon}</div>
-      <div class="notif-info">
-        <strong>${n.title}</strong>
-        <p>${n.text}</p>
-        <time>${n.time}</time>
-      </div>
-    </div>
-  `).join('');
-}
-
-// ===== LEADERBOARD =====
-function showLeaderboard() {
-  document.getElementById('modal-leaderboard').classList.remove('hidden');
-  renderLeaderboard();
-}
-
-function renderLeaderboard() {
-  const user = currentUser;
-  const myEntry = { name:`${user.firstName} ${user.lastName}`, city:user.city, coins:user.coins, bags:user.bags, initials:(user.firstName[0]||'Э')+(user.lastName[0]||'Г'), isMe:true };
-  let list = [...DEMO_LEADERBOARD, myEntry].sort((a,b) => b.coins - a.coins).slice(0,10);
-
-  document.getElementById('leaderboard-list').innerHTML = list.map((u,i) => {
-    const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
-    const rankIcon = i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
-    return `
-      <div class="lb-item" style="${u.isMe?'background:#e8f5e9;border-radius:12px;padding:12px;margin:-4px 0':''}">
-        <div class="lb-rank ${rankClass}">${rankIcon}</div>
-        <div class="lb-avatar" style="${u.isMe?'background:linear-gradient(135deg,#1a6b3c,#27ae60)':''}">${u.initials}</div>
-        <div class="lb-info">
-          <strong>${u.name} ${u.isMe?'(Вы)':''}</strong>
-          <small>📍 ${u.city} · ${u.bags} пакетов</small>
-        </div>
-        <span class="lb-coins"><i class="fas fa-coins"></i> ${u.coins}</span>
-      </div>
-    `;
-  }).join('');
-}
-
-function switchLB(period) {
-  document.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
-  renderLeaderboard();
 }
 
 // ===== BONUSES =====
+function simScan() {
+  const coins = 10 * (Math.floor(Math.random()*3)+1);
+  const bags = Math.floor(Math.random()*3)+1;
+  const pts = ['Пункт Б — Шохмансур','Пункт В — Сино','Пункт Г — Авиценна'];
+  user.coins += coins; user.bags += bags;
+  user.history = user.history || [];
+  user.history.unshift({date:new Date().toLocaleDateString('ru'), bags, coins, point:pts[Math.floor(Math.random()*pts.length)]});
+  checkAchievements(); saveUser(); updateUI(); renderScanHistory();
+  toast(`+${coins} EcoCoin за ${bags} пакет${bags>1?'ов':''}! 🎉`, 'gold');
+  confetti();
+}
+
 function claimDaily() {
-  if (currentUser.dailyClaimed) { showToast('Уже получено сегодня ✓', 'error'); return; }
-  currentUser.coins += 10;
-  currentUser.dailyClaimed = true;
-  saveUser();
-  updateUI();
-  document.getElementById('daily-bonus-btn').textContent = 'Получено ✓';
-  document.getElementById('daily-bonus-btn').classList.add('claimed');
-  showToast('+10 EcoCoin! Ежедневный бонус 🎉', 'gold');
-  launchConfetti();
+  if (user.dailyClaimed) { toast('Бонус уже получен сегодня ✓', 'error'); return; }
+  user.coins += 10; user.dailyClaimed = true;
+  saveUser(); updateUI();
+  document.getElementById('daily-btn').textContent = 'Получено ✓';
+  document.getElementById('daily-btn').style.background = '#ccc';
+  toast('+10 EcoCoin ежедневный бонус! 🎉', 'gold');
+  confetti();
 }
 
-function showScanModal() {
-  const coins = 10 * (Math.floor(Math.random() * 3) + 1);
-  const bags = Math.floor(Math.random() * 3) + 1;
-  currentUser.coins += coins;
-  currentUser.bags += bags;
-  currentUser.history = currentUser.history || [];
-  currentUser.history.unshift({
-    date: new Date().toLocaleDateString('ru'),
-    bags, coins,
-    point: TRASH_POINTS[Math.floor(Math.random() * TRASH_POINTS.length)].name
-  });
-  checkAchievements();
-  saveUser();
-  updateUI();
-  renderScanHistory();
-  showToast(`+${coins} EcoCoin за ${bags} пакет${bags>1?'ов':''}! 🎉`, 'gold');
-  launchConfetti();
+function shareRef() {
+  const txt = `Присоединяйся к EcoCity! Получай бонусы за мусор. Мой код: ${user.uid}`;
+  if (navigator.share) navigator.share({title:'EcoCity',text:txt});
+  else { navigator.clipboard.writeText(txt); toast('Реферальная ссылка скопирована!','success'); }
 }
 
-function showReferral() {
-  const link = `https://ecocity.tj/join?ref=${currentUser.uid}`;
-  if (navigator.share) {
-    navigator.share({ title:'Присоединяйся к EcoCity!', text:'Получай бонусы за сдачу мусора!', url:link });
-  } else {
-    navigator.clipboard.writeText(link).then(() => showToast('Реферальная ссылка скопирована!', 'success'));
+function sortBonus() {
+  user.coins += 25; saveUser(); updateUI();
+  toast('+25 EcoCoin за сортировку мусора! ♻️', 'gold');
+  confetti();
+}
+
+function redeem(name, cost) {
+  if (user.coins < cost) { toast(`Нужно ещё ${cost-user.coins} EcoCoin`, 'error'); return; }
+  user.coins -= cost; saveUser(); updateUI();
+  toast(`✅ ${name} получен! -${cost} EcoCoin`, 'success');
+}
+
+// ===== LEADERBOARD =====
+function renderLeaderboard() {
+  const lb = [...LB_DATA, {name:user.firstName+' '+user.lastName, city:user.city, coins:user.coins, bags:user.bags, initials:(user.firstName[0]||'Э')+(user.lastName[0]||'Г'), isMe:true}]
+    .sort((a,b)=>b.coins-a.coins).slice(0,10);
+  document.getElementById('lb-body').innerHTML = lb.map((u,i)=>`
+    <div class="lb-item ${u.isMe?'me':''}">
+      <div class="lb-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+      <div class="lb-av">${u.initials}</div>
+      <div class="lb-info"><strong>${u.name}${u.isMe?' (Вы)':''}</strong><small>📍 ${u.city} · ${u.bags} пакетов</small></div>
+      <span class="lb-coins"><i class="fas fa-coins"></i> ${u.coins}</span>
+    </div>
+  `).join('');
+}
+
+// ===== CHAT =====
+const COMP_DATA = {
+  city: [{n:'Душанбе',v:2840,icon:'🥇'},{n:'Ташкент',v:2310,icon:'🥈'},{n:'Бишкек',v:1950,icon:'🥉'},{n:'Алматы',v:1720,icon:'4'},{n:'Астана',v:1380,icon:'5'}],
+  district: [{n:'Шохмансур',v:980,icon:'🥇'},{n:'Сино',v:870,icon:'🥈'},{n:'Фирдавси',v:760,icon:'🥉'},{n:'Исмоили Сомони',v:640,icon:'4'},{n:'Авиценна',v:520,icon:'5'}],
+  street: [{n:'ул. Рудаки',v:450,icon:'🥇'},{n:'пр. Дусти',v:380,icon:'🥈'},{n:'ул. Айни',v:310,icon:'🥉'},{n:'ул. Борбад',v:280,icon:'4'},{n:'пр. Борбад',v:220,icon:'5'}],
+  activist: [{n:'Акбар Рахимов',v:284,icon:'🥇'},{n:'Малика Усмонова',v:231,icon:'🥈'},{n:'Бекзод Алиев',v:195,icon:'🥉'},{n:'Зарина Касымова',v:172,icon:'4'},{n:'Фирдавс Назаров',v:154,icon:'5'}],
+};
+
+function renderCompetition(type) {
+  const data = COMP_DATA[type];
+  const unit = type === 'activist' ? 'пакетов' : 'EcoCoin';
+  document.getElementById('comp-list').innerHTML = data.map((item,i) => `
+    <div class="comp-item">
+      <span class="comp-rank">${item.icon}</span>
+      <div class="comp-info"><strong>${item.n}</strong></div>
+      <span class="comp-val"><i class="fas fa-coins"></i> ${item.v} ${unit}</span>
+    </div>
+  `).join('');
+}
+
+function switchComp(type, btn) {
+  document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCompetition(type);
+}
+
+const CHAT_CONTENT = {
+  complaint: {
+    title:'🚨 Жалоба на коммунальщиков',
+    msgs: [{from:'bot',text:'Здравствуйте! Опишите проблему с вывозом мусора.'},{from:'bot',text:'Укажите адрес и время, когда не приехала машина.'}],
+    templates: ['Не вывозят мусор более 3 дней','Нарушают график вывоза','Контейнер переполнен']
+  },
+  violation: {
+    title:'⚠️ Нарушение выброса мусора',
+    msgs: [{from:'bot',text:'Зафиксируйте нарушение. Укажите адрес и описание.'},{from:'bot',text:'Фото нарушения поможет быстрее обработать жалобу.'}],
+    templates: ['Выброс мусора в неположенном месте','Мусор оставлен у подъезда','Незаконная свалка']
+  },
+  support: {
+    title:'💬 Связь с оператором EcoCity',
+    msgs: [{from:'bot',text:'Здравствуйте! Я Эко-Ассистент. Чем могу помочь?'},{from:'bot',text:'Среднее время ответа оператора: 5 минут.'}],
+    templates: ['Вопрос по начислению EcoCoin','Не приходят бонусы','Проблема с QR-кодом']
   }
+};
+
+function openChat(type) {
+  const c = CHAT_CONTENT[type];
+  document.getElementById('chat-modal-title').textContent = c.title;
+  document.getElementById('chat-modal-body').innerHTML = `
+    <div class="chat-msgs" id="chat-msgs">
+      ${c.msgs.map(m=>`<div class="chat-msg bot"><div class="cm-bubble">${m.text}</div></div>`).join('')}
+    </div>
+    <div class="chat-quick-replies">${c.templates.map(t=>`<button class="cqr" onclick="sendMsg('${t}')">${t}</button>`).join('')}</div>
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" class="form-control" placeholder="Написать сообщение...">
+      <button class="chat-send" onclick="sendMsg(document.getElementById('chat-input').value)"><i class="fas fa-paper-plane"></i></button>
+    </div>
+  `;
+  openModal('modal-chat');
 }
 
-function showSortBonus() {
-  currentUser.coins += 25;
-  saveUser();
-  updateUI();
-  showToast('+25 EcoCoin за раздельный сбор! ♻️', 'gold');
-  launchConfetti();
+function sendMsg(text) {
+  if (!text?.trim()) return;
+  const msgs = document.getElementById('chat-msgs');
+  if (!msgs) return;
+  msgs.innerHTML += `<div class="chat-msg me"><div class="cm-bubble">${text}</div></div>`;
+  const inp = document.getElementById('chat-input');
+  if (inp) inp.value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(() => {
+    msgs.innerHTML += `<div class="chat-msg bot"><div class="cm-bubble">Ваше обращение зарегистрировано. Номер: #${Math.floor(10000+Math.random()*90000)}. Ответим в течение 24 часов.</div></div>`;
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1000);
 }
 
-function redeemItem(name, cost) {
-  if (currentUser.coins < cost) {
-    showToast(`Недостаточно EcoCoin. Нужно ещё ${cost - currentUser.coins}`, 'error');
-    return;
-  }
-  currentUser.coins -= cost;
-  saveUser();
-  updateUI();
-  showToast(`✅ ${name} получен! -${cost} EcoCoin`, 'success');
+// ===== NOTIFICATIONS =====
+const NOTIFS = [
+  {icon:'🎉',bg:'#e8f5e9',title:'Добро пожаловать в EcoCity!',text:'Аккаунт создан. Начните сдавать мусор!',time:'Сейчас'},
+  {icon:'💰',bg:'#fff8e1',title:'+10 EcoCoin — Ежедневный бонус',text:'Получите ежедневный бонус за вход',time:'1 ч назад'},
+  {icon:'📍',bg:'#e3f2fd',title:'Новый пункт сбора рядом',text:'Открылся пункт в 500м от вас',time:'2 ч назад'},
+  {icon:'🏆',bg:'#fce4ec',title:'Вы в топ-100!',text:'Продолжайте сдавать мусор',time:'Вчера'},
+];
+function renderNotifs() {
+  document.getElementById('notif-body').innerHTML = NOTIFS.map(n=>`
+    <div class="notif-item">
+      <div class="ni-ico" style="background:${n.bg}">${n.icon}</div>
+      <div class="ni-info"><strong>${n.title}</strong><p>${n.text}</p><time>${n.time}</time></div>
+    </div>
+  `).join('');
 }
 
-// ===== ACHIEVEMENTS CHECK =====
-function checkAchievements() {
-  if (!currentUser.earnedAchievements) currentUser.earnedAchievements = [];
-  const u = currentUser;
-  const check = (id, cond) => {
-    if (cond && !u.earnedAchievements.includes(id)) {
-      u.earnedAchievements.push(id);
-      const ach = ACHIEVEMENTS.find(a => a.id === id);
-      if (ach) setTimeout(() => showToast(`🏆 Достижение: ${ach.name} ${ach.icon}`, 'gold'), 500);
-    }
-  };
-  check('first_bag', u.bags >= 1);
-  check('bags_10', u.bags >= 10);
-  check('bags_50', u.bags >= 50);
-  check('bags_100', u.bags >= 100);
-  check('coins_100', u.coins >= 100);
-  check('coins_500', u.coins >= 500);
-  check('level_3', getLevelInfo(u.coins).level >= 3);
-  renderAchievements();
-}
-
-// ===== PAGE SWITCHING =====
-function switchPage(page) {
-  document.querySelectorAll('.app-page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  document.getElementById('nav-' + page).classList.add('active');
-  if (page === 'map') setTimeout(() => { if(map) map.invalidateSize(); }, 100);
+// ===== PAGE NAVIGATION =====
+function goPage(page) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pg-'+page).classList.add('active');
+  document.getElementById('nb-'+page).classList.add('active');
 }
 
 // ===== MODALS =====
-function showNotifications() {
-  currentUser.notifications = 0;
-  document.getElementById('notif-badge').textContent = '0';
-  saveUser();
-  document.getElementById('modal-notifications').classList.remove('hidden');
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.add('hidden');
-}
-
-// ===== SETTINGS STUBS =====
-function showEditProfile() { showToast('✏️ Редактирование профиля скоро', 'success'); }
-function showLanguage() { showToast('🌐 Поддерживается: Русский, Таджикский, Узбекский', 'success'); }
-function showAbout() { showToast('ℹ️ EcoCity v2.0 — Центральная Азия. Хакатон 2026 🏆', 'success'); }
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
 // ===== TOAST =====
-function showToast(msg, type='') {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.className = 'toast' + (type ? ' ' + type : '');
-  toast.classList.remove('hidden');
-  clearTimeout(toast._timer);
-  toast._timer = setTimeout(() => toast.classList.add('hidden'), 3000);
+function toast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + type;
+  t.classList.remove('hidden');
+  clearTimeout(t._t);
+  t._t = setTimeout(()=>t.classList.add('hidden'), 3000);
 }
 
 // ===== CONFETTI =====
-function launchConfetti() {
-  const canvas = document.getElementById('confetti-canvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  const pieces = Array.from({length:80}, () => ({
-    x: Math.random() * canvas.width, y: Math.random() * -100,
-    r: 4 + Math.random() * 6, vy: 2 + Math.random() * 4,
-    vx: (Math.random() - .5) * 3,
-    color: ['#1a6b3c','#27ae60','#f39c12','#2980b9','#e74c3c','#fff'][Math.floor(Math.random()*6)],
-    angle: Math.random() * 360
-  }));
-  let frames = 0;
-  function draw() {
-    if (frames++ > 120) { ctx.clearRect(0,0,canvas.width,canvas.height); return; }
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    pieces.forEach(p => {
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle * Math.PI/180);
-      ctx.fillStyle = p.color; ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r);
-      ctx.restore();
-      p.x += p.vx; p.y += p.vy; p.angle += 3;
-    });
+function confetti() {
+  const cv = document.getElementById('confetti');
+  const ctx = cv.getContext('2d');
+  cv.width = window.innerWidth; cv.height = window.innerHeight;
+  const pts = Array.from({length:60},()=>({x:Math.random()*cv.width,y:-20,vy:2+Math.random()*4,vx:(Math.random()-.5)*3,r:4+Math.random()*5,c:['#27ae60','#f39c12','#2980b9','#e74c3c','#fff'][~~(Math.random()*5)],a:Math.random()*360}));
+  let f=0;
+  (function draw(){
+    if(f++>100){ctx.clearRect(0,0,cv.width,cv.height);return;}
+    ctx.clearRect(0,0,cv.width,cv.height);
+    pts.forEach(p=>{ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.a*Math.PI/180);ctx.fillStyle=p.c;ctx.fillRect(-p.r,-p.r/2,p.r*2,p.r);ctx.restore();p.x+=p.vx;p.y+=p.vy;p.a+=3;});
     requestAnimationFrame(draw);
-  }
-  draw();
+  })();
 }
 
-// ===== UTILITIES =====
-function togglePass(id) {
-  const el = document.getElementById(id);
-  el.type = el.type === 'password' ? 'text' : 'password';
-}
+// ===== UTILS =====
+function togglePass(id) { const e=document.getElementById(id); e.type=e.type==='password'?'text':'password'; }
