@@ -4,739 +4,432 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#1a6b3c">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>EcoCity — Умный город, чистое будущее</title>
-<meta name="description" content="EcoCity — платформа для управления отходами в Центральной Азии. Регистрация, QR-коды, бонусы за экологию.">
-
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
-<!-- Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<!-- ========== SPLASH SCREEN ========== -->
+<!-- SPLASH -->
 <div id="splash-screen" class="splash-screen">
   <div class="splash-content">
-    <div class="splash-logo">
-      <div class="logo-circle">
-        <i class="fas fa-leaf"></i>
-      </div>
-      <h1 class="splash-title">EcoCity</h1>
-      <p class="splash-sub">Умный город • Чистое будущее</p>
-    </div>
-    <div class="splash-loader">
-      <div class="loader-bar"><div class="loader-fill"></div></div>
-    </div>
-    <p class="splash-version">v2.0 · Центральная Азия</p>
+    <div class="logo-circle"><i class="fas fa-leaf"></i></div>
+    <h1 class="splash-title">EcoCity</h1>
+    <p class="splash-sub">Умный город • Чистое будущее</p>
+    <div class="splash-loader"><div class="loader-fill"></div></div>
   </div>
 </div>
 
-<!-- ========== ONBOARDING ========== -->
-<div id="onboarding" class="onboarding hidden">
-  <div class="onboard-slides">
-    <div class="onboard-slide active" data-slide="0">
-      <div class="slide-illustration">
-        <div class="illus-circle green"><i class="fas fa-qrcode"></i></div>
-        <div class="illus-dots"></div>
-      </div>
-      <h2>QR-коды для каждого</h2>
-      <p>Получите уникальный QR-код, наклейте на пакеты с мусором и получайте бонусы автоматически</p>
-    </div>
-    <div class="onboard-slide" data-slide="1">
-      <div class="slide-illustration">
-        <div class="illus-circle blue"><i class="fas fa-map-marked-alt"></i></div>
-      </div>
-      <h2>Умная карта</h2>
-      <p>Находите ближайшие точки сбора мусора в Душанбе и других городах. Система строит маршрут автоматически</p>
-    </div>
-    <div class="onboard-slide" data-slide="2">
-      <div class="slide-illustration">
-        <div class="illus-circle gold"><i class="fas fa-trophy"></i></div>
-      </div>
-      <h2>Зарабатывайте бонусы</h2>
-      <p>За каждый сданный пакет мусора получайте EcoCoin. Повышайте уровень и обменивайте на реальные награды</p>
-    </div>
-  </div>
-  <div class="onboard-nav">
-    <div class="onboard-dots">
-      <span class="dot active"></span><span class="dot"></span><span class="dot"></span>
-    </div>
-    <button class="btn-next" id="onboard-next">Далее <i class="fas fa-arrow-right"></i></button>
-  </div>
-</div>
-
-<!-- ========== AUTH PAGES ========== -->
+<!-- AUTH -->
 <div id="auth-page" class="auth-page hidden">
+
   <!-- Welcome -->
   <div id="auth-welcome" class="auth-screen active">
-    <div class="auth-bg"></div>
-    <div class="auth-content">
-      <div class="auth-logo">
-        <div class="logo-sm"><i class="fas fa-leaf"></i></div>
-        <h1>EcoCity</h1>
-      </div>
-      <div class="auth-card">
-        <h2>Добро пожаловать!</h2>
-        <p>Присоединяйтесь к экологическому движению Центральной Азии</p>
-        <button class="btn-primary w-full" onclick="showAuthScreen('register')">
-          <i class="fas fa-user-plus"></i> Создать аккаунт
-        </button>
-        <button class="btn-outline w-full mt-2" onclick="showAuthScreen('login')">
-          <i class="fas fa-sign-in-alt"></i> Войти в систему
-        </button>
-        <div class="demo-note">
-          <i class="fas fa-info-circle"></i>
-          Демо: нажмите "Войти" без заполнения полей
-        </div>
-      </div>
+    <div class="auth-hero">
+      <div class="logo-circle lg"><i class="fas fa-leaf"></i></div>
+      <h1>EcoCity</h1>
+      <p>Экологическая платформа Центральной Азии</p>
+    </div>
+    <div class="auth-card">
+      <div class="demo-banner"><i class="fas fa-flask"></i> ДЕМО-ВЕРСИЯ платформы</div>
+      <button class="btn-primary w-full" onclick="showScreen('register-1')"><i class="fas fa-user-plus"></i> Зарегистрироваться</button>
+      <button class="btn-outline w-full mt-10" onclick="demoLogin()"><i class="fas fa-flask"></i> Войти как демо-пользователь</button>
     </div>
   </div>
 
-  <!-- Register Step 1: Phone -->
-  <div id="auth-register" class="auth-screen">
-    <div class="auth-header">
-      <button class="btn-back" onclick="showAuthScreen('welcome')"><i class="fas fa-arrow-left"></i></button>
-      <h3>Регистрация</h3>
-      <div class="step-indicator"><span class="step active">1</span><span class="step">2</span><span class="step">3</span></div>
+  <!-- Register Step 1 -->
+  <div id="auth-register-1" class="auth-screen">
+    <div class="auth-top-bar">
+      <button class="btn-back" onclick="showScreen('welcome')"><i class="fas fa-arrow-left"></i></button>
+      <span>Регистрация — Шаг 1 из 3</span>
+      <div class="steps"><span class="s active">1</span><span class="s">2</span><span class="s">3</span></div>
     </div>
     <div class="auth-body">
-      <div class="step-title">
-        <div class="step-icon"><i class="fas fa-phone-alt"></i></div>
-        <h2>Номер телефона</h2>
-        <p>Введите номер для подтверждения личности</p>
-      </div>
+      <div class="demo-banner"><i class="fas fa-info-circle"></i> ДЕМО — данные не проверяются, это тестовая регистрация</div>
+      <div class="form-icon"><i class="fas fa-phone-alt"></i></div>
+      <h2>Номер телефона</h2>
       <div class="form-group">
         <label>Страна</label>
-        <select id="reg-country" class="form-control" onchange="updatePhoneCode()">
-          <option value="+992" data-flag="🇹🇯">🇹🇯 Таджикистан (+992)</option>
-          <option value="+996" data-flag="🇰🇬">🇰🇬 Кыргызстан (+996)</option>
-          <option value="+998" data-flag="🇺🇿">🇺🇿 Узбекистан (+998)</option>
-          <option value="+7" data-flag="🇰🇿">🇰🇿 Казахстан (+7)</option>
-          <option value="+7" data-flag="🇷🇺">🇷🇺 Россия (+7)</option>
+        <select id="reg-country" class="form-control" onchange="document.getElementById('phone-code').textContent=this.value">
+          <option value="+992">🇹🇯 Таджикистан (+992)</option>
+          <option value="+996">🇰🇬 Кыргызстан (+996)</option>
+          <option value="+998">🇺🇿 Узбекистан (+998)</option>
+          <option value="+7">🇰🇿 Казахстан (+7)</option>
+          <option value="+7">🇷🇺 Россия (+7)</option>
         </select>
       </div>
       <div class="form-group">
-        <label>Номер телефона</label>
-        <div class="phone-input">
-          <span class="phone-code" id="phone-code">+992</span>
-          <input type="tel" id="reg-phone" class="form-control" placeholder="XX XXX XXXX" maxlength="15">
-        </div>
+        <label>Телефон</label>
+        <div class="phone-row"><span class="phone-code" id="phone-code">+992</span><input type="tel" id="reg-phone" class="form-control" placeholder="XX XXX XXXX"></div>
       </div>
       <div class="form-group">
-        <label>Город проживания</label>
+        <label>Город</label>
         <select id="reg-city" class="form-control">
-          <optgroup label="🇹🇯 Таджикистан">
-            <option value="Душанбе">Душанбе</option>
-            <option value="Худжанд">Худжанд</option>
-            <option value="Куляб">Куляб</option>
-            <option value="Курган-Тюбе">Курган-Тюбе</option>
-            <option value="Истаравшан">Истаравшан</option>
-            <option value="Турсунзода">Турсунзода</option>
-            <option value="Пенджикент">Пенджикент</option>
-          </optgroup>
-          <optgroup label="🇺🇿 Узбекистан">
-            <option value="Ташкент">Ташкент</option>
-            <option value="Самарканд">Самарканд</option>
-            <option value="Бухара">Бухара</option>
-            <option value="Наманган">Наманган</option>
-            <option value="Андижан">Андижан</option>
-            <option value="Фергана">Фергана</option>
-            <option value="Нукус">Нукус</option>
-          </optgroup>
-          <optgroup label="🇰🇬 Кыргызстан">
-            <option value="Бишкек">Бишкек</option>
-            <option value="Ош">Ош</option>
-            <option value="Джалал-Абад">Джалал-Абад</option>
-            <option value="Каракол">Каракол</option>
-            <option value="Токмок">Токмок</option>
-          </optgroup>
-          <optgroup label="🇰🇿 Казахстан">
-            <option value="Алматы">Алматы</option>
-            <option value="Астана">Астана</option>
-            <option value="Шымкент">Шымкент</option>
-            <option value="Караганда">Караганда</option>
-            <option value="Актобе">Актобе</option>
-            <option value="Атырау">Атырау</option>
-          </optgroup>
-          <optgroup label="🇷🇺 Россия">
-            <option value="Москва">Москва</option>
-            <option value="Санкт-Петербург">Санкт-Петербург</option>
-            <option value="Новосибирск">Новосибирск</option>
-            <option value="Екатеринбург">Екатеринбург</option>
-          </optgroup>
+          <optgroup label="🇹🇯 Таджикистан"><option>Душанбе</option><option>Худжанд</option><option>Куляб</option><option>Курган-Тюбе</option><option>Истаравшан</option><option>Турсунзода</option><option>Пенджикент</option></optgroup>
+          <optgroup label="🇺🇿 Узбекистан"><option>Ташкент</option><option>Самарканд</option><option>Бухара</option><option>Наманган</option><option>Андижан</option><option>Фергана</option><option>Нукус</option></optgroup>
+          <optgroup label="🇰🇬 Кыргызстан"><option>Бишкек</option><option>Ош</option><option>Джалал-Абад</option><option>Каракол</option></optgroup>
+          <optgroup label="🇰🇿 Казахстан"><option>Алматы</option><option>Астана</option><option>Шымкент</option><option>Караганда</option></optgroup>
+          <optgroup label="🇷🇺 Россия"><option>Москва</option><option>Санкт-Петербург</option></optgroup>
         </select>
       </div>
-      <button class="btn-primary w-full" onclick="regStep1()">
-        Далее <i class="fas fa-arrow-right"></i>
-      </button>
+      <button class="btn-primary w-full" onclick="showScreen('register-otp')">Далее <i class="fas fa-arrow-right"></i></button>
     </div>
   </div>
 
-  <!-- Register Step 2: Passport -->
-  <div id="auth-passport" class="auth-screen">
-    <div class="auth-header">
-      <button class="btn-back" onclick="showAuthScreen('register')"><i class="fas fa-arrow-left"></i></button>
-      <h3>Регистрация</h3>
-      <div class="step-indicator"><span class="step done">✓</span><span class="step active">2</span><span class="step">3</span></div>
+  <!-- OTP -->
+  <div id="auth-register-otp" class="auth-screen">
+    <div class="auth-top-bar">
+      <button class="btn-back" onclick="showScreen('register-1')"><i class="fas fa-arrow-left"></i></button>
+      <span>Подтверждение</span>
+    </div>
+    <div class="auth-body center">
+      <div class="demo-banner big"><i class="fas fa-flask"></i><strong>ДЕМО-режим</strong><br>Настоящие SMS не отправляются.<br>Введите любые 4 цифры или нажмите "Пропустить"</div>
+      <div class="form-icon blue"><i class="fas fa-mobile-alt"></i></div>
+      <h2>Код подтверждения</h2>
+      <p class="muted">Введите любые 4 цифры для демонстрации</p>
+      <div class="otp-row">
+        <input class="otp-box" maxlength="1" type="number" oninput="otpNext(this,0)">
+        <input class="otp-box" maxlength="1" type="number" oninput="otpNext(this,1)">
+        <input class="otp-box" maxlength="1" type="number" oninput="otpNext(this,2)">
+        <input class="otp-box" maxlength="1" type="number" oninput="otpNext(this,3)">
+      </div>
+      <button class="btn-primary w-full" onclick="showScreen('register-2')">Подтвердить</button>
+      <button class="btn-ghost w-full mt-10" onclick="showScreen('register-2')"><i class="fas fa-forward"></i> Пропустить (Демо)</button>
+    </div>
+  </div>
+
+  <!-- Register Step 2 -->
+  <div id="auth-register-2" class="auth-screen">
+    <div class="auth-top-bar">
+      <button class="btn-back" onclick="showScreen('register-1')"><i class="fas fa-arrow-left"></i></button>
+      <span>Регистрация — Шаг 2 из 3</span>
+      <div class="steps"><span class="s done">✓</span><span class="s active">2</span><span class="s">3</span></div>
     </div>
     <div class="auth-body">
-      <div class="step-title">
-        <div class="step-icon"><i class="fas fa-id-card"></i></div>
-        <h2>Удостоверение личности</h2>
-        <p>Данные проверяются через государственную базу</p>
-      </div>
-      <div class="passport-badge">
-        <i class="fas fa-shield-alt"></i>
-        <span>Защищено • Государственная верификация</span>
-      </div>
-      <div class="form-group">
-        <label>Серия и номер паспорта / ID</label>
-        <input type="text" id="reg-passport" class="form-control" placeholder="A 0000000" maxlength="12">
-        <small class="hint"><i class="fas fa-info-circle"></i> Пример: A 1234567 (Таджикистан)</small>
-      </div>
-      <div class="form-group">
-        <label>Имя</label>
-        <input type="text" id="reg-firstname" class="form-control" placeholder="Введите имя">
-      </div>
-      <div class="form-group">
-        <label>Фамилия</label>
-        <input type="text" id="reg-lastname" class="form-control" placeholder="Введите фамилию">
-      </div>
-      <div class="form-group">
-        <label>Дата рождения</label>
-        <input type="date" id="reg-dob" class="form-control">
-      </div>
-      <div class="verify-status" id="verify-status" style="display:none">
-        <div class="verify-spinner"><i class="fas fa-circle-notch fa-spin"></i></div>
-        <span>Проверка в государственной базе данных...</span>
-      </div>
-      <button class="btn-primary w-full" onclick="regStep2()">
-        <i class="fas fa-shield-check"></i> Верифицировать и продолжить
-      </button>
+      <div class="demo-banner"><i class="fas fa-info-circle"></i> ДЕМО — ID паспорта не проверяется через ГосБазу</div>
+      <div class="form-icon gold"><i class="fas fa-id-card"></i></div>
+      <h2>Удостоверение личности</h2>
+      <div class="passport-info"><i class="fas fa-shield-alt"></i> В реальной версии данные проверяются через государственную базу данных. В демо — проверка симулируется.</div>
+      <div class="form-group"><label>Серия и номер ID / Паспорт</label><input type="text" id="reg-passport" class="form-control" placeholder="A 1234567"></div>
+      <div class="form-group"><label>Имя</label><input type="text" id="reg-first" class="form-control" placeholder="Ваше имя"></div>
+      <div class="form-group"><label>Фамилия</label><input type="text" id="reg-last" class="form-control" placeholder="Ваша фамилия"></div>
+      <div class="form-group"><label>Дата рождения</label><input type="date" id="reg-dob" class="form-control"></div>
+      <div id="verify-anim" class="verify-anim hidden"><i class="fas fa-circle-notch fa-spin"></i> Демо-проверка в базе данных...</div>
+      <button class="btn-primary w-full" onclick="doVerify()"><i class="fas fa-shield-check"></i> Верифицировать (Демо)</button>
     </div>
   </div>
 
-  <!-- Register Step 3: Password & Confirm -->
-  <div id="auth-confirm" class="auth-screen">
-    <div class="auth-header">
-      <button class="btn-back" onclick="showAuthScreen('passport')"><i class="fas fa-arrow-left"></i></button>
-      <h3>Регистрация</h3>
-      <div class="step-indicator"><span class="step done">✓</span><span class="step done">✓</span><span class="step active">3</span></div>
+  <!-- Register Step 3 -->
+  <div id="auth-register-3" class="auth-screen">
+    <div class="auth-top-bar">
+      <button class="btn-back" onclick="showScreen('register-2')"><i class="fas fa-arrow-left"></i></button>
+      <span>Регистрация — Шаг 3 из 3</span>
+      <div class="steps"><span class="s done">✓</span><span class="s done">✓</span><span class="s active">3</span></div>
     </div>
     <div class="auth-body">
-      <div class="step-title">
-        <div class="step-icon success"><i class="fas fa-check-circle"></i></div>
-        <h2>Создание пароля</h2>
-        <p>Последний шаг — защитите ваш аккаунт</p>
+      <div class="verified-row"><i class="fas fa-user-check"></i><div><strong id="verified-name">Имя Фамилия</strong><small>✓ Демо-верификация пройдена</small></div><span class="badge-ok">Демо ✓</span></div>
+      <div class="form-group mt-16"><label>Пароль</label>
+        <div class="pass-wrap"><input type="password" id="reg-pass" class="form-control" placeholder="Минимум 6 символов"><button class="eye-btn" onclick="togglePass('reg-pass')"><i class="fas fa-eye"></i></button></div>
       </div>
-      <div class="verified-card">
-        <i class="fas fa-user-check"></i>
-        <div>
-          <strong id="verified-name">Имя Фамилия</strong>
-          <small>Верифицирован через ГосБазу</small>
-        </div>
-        <span class="verified-badge">✓ Подтверждён</span>
+      <div class="form-group"><label>Повтор пароля</label>
+        <div class="pass-wrap"><input type="password" id="reg-pass2" class="form-control" placeholder="Повторите пароль"><button class="eye-btn" onclick="togglePass('reg-pass2')"><i class="fas fa-eye"></i></button></div>
       </div>
-      <div class="form-group">
-        <label>Придумайте пароль</label>
-        <div class="password-wrap">
-          <input type="password" id="reg-pass" class="form-control" placeholder="Минимум 6 символов">
-          <button class="toggle-pass" onclick="togglePass('reg-pass')"><i class="fas fa-eye"></i></button>
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Повторите пароль</label>
-        <div class="password-wrap">
-          <input type="password" id="reg-pass2" class="form-control" placeholder="Повторите пароль">
-          <button class="toggle-pass" onclick="togglePass('reg-pass2')"><i class="fas fa-eye"></i></button>
-        </div>
-      </div>
-      <div class="agree-check">
-        <input type="checkbox" id="agree-terms" checked>
-        <label for="agree-terms">Принимаю условия использования EcoCity и политику конфиденциальности</label>
-      </div>
-      <button class="btn-primary w-full" onclick="regComplete()">
-        <i class="fas fa-leaf"></i> Создать EcoCity аккаунт
-      </button>
-    </div>
-  </div>
-
-  <!-- Login -->
-  <div id="auth-login" class="auth-screen">
-    <div class="auth-header">
-      <button class="btn-back" onclick="showAuthScreen('welcome')"><i class="fas fa-arrow-left"></i></button>
-      <h3>Вход в систему</h3>
-    </div>
-    <div class="auth-body">
-      <div class="step-title">
-        <div class="step-icon"><i class="fas fa-sign-in-alt"></i></div>
-        <h2>С возвращением!</h2>
-        <p>Войдите в свой EcoCity аккаунт</p>
-      </div>
-      <div class="form-group">
-        <label>Номер телефона</label>
-        <div class="phone-input">
-          <span class="phone-code">+992</span>
-          <input type="tel" id="login-phone" class="form-control" placeholder="XX XXX XXXX">
-        </div>
-      </div>
-      <div class="form-group">
-        <label>Пароль</label>
-        <div class="password-wrap">
-          <input type="password" id="login-pass" class="form-control" placeholder="Ваш пароль">
-          <button class="toggle-pass" onclick="togglePass('login-pass')"><i class="fas fa-eye"></i></button>
-        </div>
-      </div>
-      <button class="btn-primary w-full" onclick="doLogin()">
-        <i class="fas fa-sign-in-alt"></i> Войти
-      </button>
-      <div class="demo-login">
-        <button class="btn-ghost w-full" onclick="demoLogin()">
-          <i class="fas fa-flask"></i> Демо-вход (без регистрации)
-        </button>
-      </div>
-      <p class="auth-switch">Нет аккаунта? <a onclick="showAuthScreen('register')">Зарегистрироваться</a></p>
-    </div>
-  </div>
-
-  <!-- OTP Verification -->
-  <div id="auth-otp" class="auth-screen">
-    <div class="auth-header">
-      <button class="btn-back" onclick="showAuthScreen('register')"><i class="fas fa-arrow-left"></i></button>
-      <h3>Подтверждение</h3>
-    </div>
-    <div class="auth-body otp-body">
-      <div class="step-icon"><i class="fas fa-mobile-alt"></i></div>
-      <h2>Введите код</h2>
-      <p>SMS с кодом отправлен на <strong id="otp-phone-display">+992 XX XXX XXXX</strong></p>
-      <div class="otp-inputs">
-        <input type="number" class="otp-input" maxlength="1" oninput="otpMove(this,0)">
-        <input type="number" class="otp-input" maxlength="1" oninput="otpMove(this,1)">
-        <input type="number" class="otp-input" maxlength="1" oninput="otpMove(this,2)">
-        <input type="number" class="otp-input" maxlength="1" oninput="otpMove(this,3)">
-      </div>
-      <p class="otp-hint">Демо-код: <strong>1234</strong></p>
-      <button class="btn-primary w-full" onclick="verifyOTP()">Подтвердить</button>
-      <button class="btn-ghost w-full mt-2">Отправить код повторно (30с)</button>
+      <label class="check-row"><input type="checkbox" id="agree" checked> Принимаю условия использования EcoCity</label>
+      <button class="btn-primary w-full mt-16" onclick="doRegister()"><i class="fas fa-leaf"></i> Создать EcoCity аккаунт</button>
     </div>
   </div>
 </div>
 
-<!-- ========== MAIN APP ========== -->
+<!-- MAIN APP -->
 <div id="main-app" class="main-app hidden">
 
-  <!-- Top Header -->
-  <header class="app-header" id="app-header">
-    <div class="header-left">
-      <div class="header-logo"><i class="fas fa-leaf"></i></div>
-      <div>
-        <h1 class="header-title">EcoCity</h1>
-        <span class="header-sub" id="header-city">Душанбе</span>
-      </div>
+  <header class="app-header">
+    <div class="h-left">
+      <div class="h-logo"><i class="fas fa-leaf"></i></div>
+      <div><div class="h-title">EcoCity</div><div class="h-city" id="h-city">Душанбе</div></div>
     </div>
-    <div class="header-right">
-      <button class="header-btn notification-btn" onclick="showNotifications()">
-        <i class="fas fa-bell"></i>
-        <span class="notif-badge" id="notif-badge">3</span>
-      </button>
-      <div class="header-eco-coins">
-        <i class="fas fa-coins"></i>
-        <span id="header-coins">0</span>
-      </div>
+    <div class="h-right">
+      <button class="h-btn" onclick="openModal('modal-notif')"><i class="fas fa-bell"></i><span class="badge" id="notif-dot">3</span></button>
+      <div class="coin-pill"><i class="fas fa-coins"></i><span id="h-coins">0</span></div>
     </div>
   </header>
 
-  <!-- Pages -->
-  <div class="app-pages">
+  <div class="pages-wrap">
 
-    <!-- PAGE: NEWS -->
-    <div id="page-news" class="app-page active">
-      <div class="page-scroll">
-
-        <!-- Hero Banner -->
-        <div class="news-hero">
-          <div class="hero-content">
-            <div class="hero-greeting" id="hero-greeting">Доброе утро, <strong id="hero-name">Пользователь</strong>!</div>
-            <div class="hero-stats-row">
-              <div class="hero-stat">
-                <span class="hero-stat-val" id="stat-bags">0</span>
-                <span class="hero-stat-label">Пакетов</span>
-              </div>
-              <div class="hero-stat-divider"></div>
-              <div class="hero-stat">
-                <span class="hero-stat-val" id="stat-coins">0</span>
-                <span class="hero-stat-label">EcoCoin</span>
-              </div>
-              <div class="hero-stat-divider"></div>
-              <div class="hero-stat">
-                <span class="hero-stat-val" id="stat-level-num">1</span>
-                <span class="hero-stat-label">Уровень</span>
-              </div>
-            </div>
+    <!-- NEWS -->
+    <div id="pg-news" class="page active">
+      <div class="scroll">
+        <div class="hero-card">
+          <div class="hero-greeting" id="hero-greet">Добро пожаловать!</div>
+          <div class="hero-stats">
+            <div class="hs"><span id="s-bags">0</span><small>Пакетов</small></div>
+            <div class="hs-div"></div>
+            <div class="hs"><span id="s-coins">0</span><small>EcoCoin</small></div>
+            <div class="hs-div"></div>
+            <div class="hs"><span id="s-lvl">1</span><small>Уровень</small></div>
           </div>
-          <div class="hero-level-badge" id="hero-level-badge">
-            <i class="fas fa-seedling"></i>
-            <span id="hero-level-name">Эко Новичок</span>
-          </div>
+          <div class="hero-lvl-tag" id="hero-lvl-tag"><i class="fas fa-seedling"></i> Эко Новичок</div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="section-title">Быстрые действия</div>
-        <div class="quick-actions">
-          <button class="quick-btn" onclick="switchPage('map')">
-            <div class="quick-icon map"><i class="fas fa-map-marker-alt"></i></div>
-            <span>Найти точку</span>
-          </button>
-          <button class="quick-btn" onclick="switchPage('qr')">
-            <div class="quick-icon qr"><i class="fas fa-qrcode"></i></div>
-            <span>Мой QR</span>
-          </button>
-          <button class="quick-btn" onclick="showScanModal()">
-            <div class="quick-icon scan"><i class="fas fa-scan"></i></div>
-            <span>Сканировать</span>
-          </button>
-          <button class="quick-btn" onclick="showLeaderboard()">
-            <div class="quick-icon top"><i class="fas fa-trophy"></i></div>
-            <span>Рейтинг</span>
-          </button>
+        <div class="level-card">
+          <div class="lv-row"><span id="lv-cur">Эко Новичок</span><span id="lv-nxt">→ Эко Помощник</span></div>
+          <div class="pbar"><div id="pbar-fill" style="width:5%"></div></div>
+          <div class="lv-hint" id="lv-hint">95 EcoCoin до следующего уровня</div>
         </div>
 
-        <!-- Progress Bar -->
-        <div class="level-progress-card">
-          <div class="level-info">
-            <span class="level-current" id="level-current-name">Эко Новичок</span>
-            <span class="level-next" id="level-next-name">→ Эко Помощник</span>
-          </div>
-          <div class="progress-bar-wrap">
-            <div class="progress-bar" id="level-progress-bar" style="width:5%"></div>
-          </div>
-          <div class="level-coins-needed"><span id="coins-to-next">95</span> EcoCoin до следующего уровня</div>
+        <div class="sec-title">⚡ Быстрые действия</div>
+        <div class="quick-grid">
+          <button class="qbtn" onclick="goPage('map')"><div class="qi map"><i class="fas fa-map-marked-alt"></i></div><span>Карта</span></button>
+          <button class="qbtn" onclick="goPage('qr')"><div class="qi qr"><i class="fas fa-qrcode"></i></div><span>QR-код</span></button>
+          <button class="qbtn" onclick="simScan()"><div class="qi scan"><i class="fas fa-recycle"></i></div><span>+Бонус</span></button>
+          <button class="qbtn" onclick="openModal('modal-lb')"><div class="qi top"><i class="fas fa-trophy"></i></div><span>Рейтинг</span></button>
         </div>
 
-        <!-- Eco News -->
-        <div class="section-title">🌿 Экологические новости</div>
-        <div class="news-list" id="news-list"></div>
-
-        <!-- Achievements -->
-        <div class="section-title">🏆 Достижения</div>
-        <div class="achievements-row" id="achievements-row"></div>
-
-        <!-- Eco Tips -->
-        <div class="eco-tip-card">
-          <div class="tip-icon"><i class="fas fa-lightbulb"></i></div>
-          <div class="tip-content">
-            <strong>Совет дня</strong>
-            <p id="eco-tip-text">Сортируйте мусор дома — это увеличит ваши бонусы в 2 раза!</p>
-          </div>
+        <div class="sec-title">📊 Таблица уровней</div>
+        <div class="level-table">
+          <div class="lt-head"><span>Уровень</span><span>EcoCoin</span><span>Бонусы</span></div>
+          <div class="lt-row" id="lt-1"><span>🌱 Эко Новичок</span><span>0–99</span><span>Базовые</span></div>
+          <div class="lt-row" id="lt-2"><span>🌿 Эко Помощник</span><span>100–299</span><span>+10% монет</span></div>
+          <div class="lt-row" id="lt-3"><span>♻️ Эко Воин</span><span>300–599</span><span>+25% + скидки</span></div>
+          <div class="lt-row" id="lt-4"><span>🌍 Эко Чемпион</span><span>600–999</span><span>+50% + транспорт</span></div>
+          <div class="lt-row" id="lt-5"><span>👑 Эко Легенда</span><span>1000+</span><span>×2 все бонусы</span></div>
         </div>
 
-        <div style="height:20px"></div>
+        <div class="sec-title">🌿 Экологические новости</div>
+        <div id="news-wrap"></div>
+
+        <div class="sec-title">🏆 Достижения</div>
+        <div class="ach-row" id="ach-row"></div>
+
+        <div class="tip-card"><div class="tip-ico"><i class="fas fa-lightbulb"></i></div><div><strong>Совет дня</strong><p id="tip-txt">Сортируйте мусор — получайте ×2 бонусы!</p></div></div>
+        <div style="height:24px"></div>
       </div>
     </div>
 
-    <!-- PAGE: MAP -->
-    <div id="page-map" class="app-page">
-      <div class="map-controls">
-        <button class="map-control-btn" onclick="locateUser()" title="Моё местоположение">
-          <i class="fas fa-crosshairs"></i>
-        </button>
-        <button class="map-control-btn active" id="filter-all" onclick="filterMarkers('all')">
-          <i class="fas fa-layer-group"></i> Все
-        </button>
-        <button class="map-control-btn" id="filter-trash" onclick="filterMarkers('trash')">
-          <i class="fas fa-trash-alt"></i> Мусор
-        </button>
-        <button class="map-control-btn" id="filter-factory" onclick="filterMarkers('factory')">
-          <i class="fas fa-industry"></i> Заводы
-        </button>
+    <!-- MAP -->
+    <div id="pg-map" class="page">
+      <div class="map-info-bar">
+        <i class="fas fa-info-circle"></i>
+        <span><b>А</b> = Вы · <b>Б,В,Г</b> = Точки сбора мусора · Нажмите на точку → маршрут</span>
       </div>
-      <div id="map"></div>
-      <div class="map-bottom-panel" id="map-panel" style="display:none">
-        <div class="map-panel-handle"></div>
-        <div class="map-panel-content" id="map-panel-content"></div>
-        <button class="btn-route" id="btn-route" onclick="buildRoute()">
-          <i class="fas fa-route"></i> Построить маршрут
-        </button>
+      <div class="demo-map" id="demo-map">
+        <!-- Streets -->
+        <div class="street h" style="top:45%;left:0;right:0"></div>
+        <div class="street h" style="top:25%;left:0;right:0"></div>
+        <div class="street h" style="top:70%;left:0;right:0"></div>
+        <div class="street v" style="left:20%;top:0;bottom:0"></div>
+        <div class="street v" style="left:50%;top:0;bottom:0"></div>
+        <div class="street v" style="left:75%;top:0;bottom:0"></div>
+        <!-- Buildings -->
+        <div class="block" style="top:28%;left:22%;width:26%;height:15%"></div>
+        <div class="block" style="top:28%;left:52%;width:21%;height:15%"></div>
+        <div class="block" style="top:48%;left:22%;width:26%;height:20%"></div>
+        <div class="block" style="top:48%;left:52%;width:21%;height:20%"></div>
+        <div class="block" style="top:5%;left:22%;width:26%;height:18%"></div>
+        <div class="block" style="top:73%;left:22%;width:26%;height:20%"></div>
+        <div class="block" style="top:73%;left:52%;width:21%;height:20%"></div>
+        <!-- Route SVG -->
+        <svg id="route-svg" class="route-svg"></svg>
+        <!-- Markers -->
+        <div class="map-marker user" style="left:50%;top:45%" title="А — Вы здесь">
+          <div class="mm-circle green pulse"><span>А</span></div>
+          <div class="mm-label">Вы</div>
+        </div>
+        <div class="map-marker trash" style="left:20%;top:25%" onclick="selectPoint('Б',20,25,420)" title="Б — Точка сбора">
+          <div class="mm-circle orange"><span>Б</span></div>
+          <div class="mm-label">Пункт Б</div>
+        </div>
+        <div class="map-marker trash" style="left:75%;top:30%" onclick="selectPoint('В',75,30,680)" title="В — Точка сбора">
+          <div class="mm-circle orange"><span>В</span></div>
+          <div class="mm-label">Пункт В</div>
+        </div>
+        <div class="map-marker trash" style="left:20%;top:70%" onclick="selectPoint('Г',20,70,310)" title="Г — Точка сбора">
+          <div class="mm-circle orange"><span>Г</span></div>
+          <div class="mm-label">Пункт Г</div>
+        </div>
       </div>
-      <div class="map-legend">
-        <div class="legend-item"><span class="legend-dot green"></span> Вы</div>
-        <div class="legend-item"><span class="legend-dot orange"></span> Мусор</div>
-        <div class="legend-item"><span class="legend-dot blue"></span> Завод</div>
+      <div class="map-legend-bar">
+        <span><span class="ld green"></span>А — Вы</span>
+        <span><span class="ld orange"></span>Б,В,Г — Сбор мусора</span>
+      </div>
+      <div id="map-panel" class="map-panel hidden">
+        <div class="mp-handle"></div>
+        <div id="mp-content"></div>
+        <button class="btn-route" id="btn-route"><i class="fas fa-route"></i> Маршрут построен</button>
       </div>
     </div>
 
-    <!-- PAGE: QR -->
-    <div id="page-qr" class="app-page">
-      <div class="page-scroll qr-page">
-        <div class="qr-header">
-          <h2>Мой QR-код</h2>
-          <p>Наклейте на пакеты с мусором</p>
-        </div>
-        <div class="qr-card">
-          <div class="qr-card-top">
-            <div class="qr-user-info">
-              <div class="qr-avatar" id="qr-avatar">ЭГ</div>
-              <div>
-                <strong id="qr-user-name">Эко Гражданин</strong>
-                <small id="qr-user-id">ID: ECO-000000</small>
-              </div>
-            </div>
-            <div class="qr-eco-badge">EcoCity</div>
+    <!-- QR -->
+    <div id="pg-qr" class="page">
+      <div class="scroll">
+        <div class="qr-page-header"><h2>Мой QR-код</h2><p>Уникальный код для идентификации ваших пакетов</p></div>
+        <div class="qr-card-wrap">
+          <div class="qr-card-top"><div class="qr-user-row"><div class="qr-av" id="qr-av">ЭГ</div><div><strong id="qr-name">Эко Гражданин</strong><small id="qr-id">ECO-000000</small></div></div><span class="eco-tag">EcoCity</span></div>
+          <div class="qr-code-area" id="qr-code-area">
+            <canvas id="qr-canvas" width="200" height="200"></canvas>
           </div>
-          <div class="qr-code-wrap">
-            <div id="qr-canvas"></div>
-            <div class="qr-shine"></div>
-          </div>
-          <div class="qr-card-bottom">
-            <div class="qr-info-row">
-              <i class="fas fa-map-marker-alt"></i>
-              <span id="qr-city">Душанбе, Таджикистан</span>
-            </div>
-            <div class="qr-info-row">
-              <i class="fas fa-coins"></i>
-              <span><strong id="qr-coins">0</strong> EcoCoin заработано</span>
-            </div>
+          <div class="qr-card-bot">
+            <div class="qi-row"><i class="fas fa-map-marker-alt"></i><span id="qr-city-txt">Душанбе</span></div>
+            <div class="qi-row"><i class="fas fa-coins"></i><span><b id="qr-coins-val">0</b> EcoCoin заработано</span></div>
           </div>
         </div>
-        <div class="qr-actions">
-          <button class="btn-qr-action" onclick="downloadQR()">
-            <i class="fas fa-download"></i> Скачать QR
-          </button>
-          <button class="btn-qr-action" onclick="shareQR()">
-            <i class="fas fa-share-alt"></i> Поделиться
-          </button>
-        </div>
-        <!-- QR Instructions -->
-        <div class="qr-instructions">
-          <h3><i class="fas fa-info-circle"></i> Как использовать</h3>
-          <div class="instruction-steps">
-            <div class="inst-step">
-              <div class="inst-num">1</div>
-              <div class="inst-text">Скачайте или распечатайте ваш QR-код</div>
-            </div>
-            <div class="inst-step">
-              <div class="inst-num">2</div>
-              <div class="inst-text">Наклейте на каждый пакет с мусором</div>
-            </div>
-            <div class="inst-step">
-              <div class="inst-num">3</div>
-              <div class="inst-text">Выбросьте в ближайшую точку сбора</div>
-            </div>
-            <div class="inst-step">
-              <div class="inst-num">4</div>
-              <div class="inst-text">Завод сканирует QR — вы получаете EcoCoin!</div>
-            </div>
-          </div>
+        <div class="qr-btns">
+          <button class="qr-btn primary" onclick="downloadQR()"><i class="fas fa-download"></i> Скачать QR</button>
+          <button class="qr-btn" onclick="shareQR()"><i class="fas fa-share-alt"></i> Поделиться</button>
         </div>
 
-        <!-- Scan History -->
-        <div class="section-title">История сканирований</div>
-        <div id="scan-history"></div>
+        <div class="qr-explain">
+          <h3><i class="fas fa-question-circle"></i> Как работает ваш QR-код?</h3>
+          <div class="qe-steps">
+            <div class="qe-step"><div class="qe-num">1</div><div><strong>Скачайте и распечатайте</strong><p>Сохраните QR-код и распечатайте на бумаге</p></div></div>
+            <div class="qe-step"><div class="qe-num">2</div><div><strong>Наклейте на пакеты</strong><p>Прикрепите QR-код на каждый мусорный пакет</p></div></div>
+            <div class="qe-step"><div class="qe-num">3</div><div><strong>Выбросьте в точку сбора</strong><p>Отнесите пакеты в ближайший пункт (Б, В или Г на карте)</p></div></div>
+            <div class="qe-step"><div class="qe-num">4</div><div><strong>Автоматические бонусы</strong><p>На заводе сканируют QR-код → система определяет вас → автоматически начисляет EcoCoin на ваш аккаунт</p></div></div>
+          </div>
+          <div class="qe-info-box"><i class="fas fa-shield-alt"></i><div><strong>Как завод узнаёт кто вы?</strong><p>Ваш QR-код содержит уникальный ID, привязанный к вашему паспорту через систему EcoCity. При сканировании на заводе система автоматически находит ваш аккаунт и начисляет бонусы без вашего участия.</p></div></div>
+        </div>
+
+        <div class="sec-title">История сканирований</div>
+        <div id="scan-hist"></div>
         <div style="height:80px"></div>
       </div>
     </div>
 
-    <!-- PAGE: PROFILE -->
-    <div id="page-profile" class="app-page">
-      <div class="page-scroll">
-        <!-- Profile Header -->
-        <div class="profile-header">
-          <div class="profile-avatar-wrap">
-            <div class="profile-avatar" id="profile-avatar">ЭГ</div>
-            <div class="profile-level-ring" id="profile-level-ring"></div>
-            <button class="avatar-edit-btn"><i class="fas fa-camera"></i></button>
-          </div>
-          <h2 id="profile-name">Эко Гражданин</h2>
-          <p id="profile-id">ID: ECO-000000</p>
-          <div class="profile-level-badge" id="profile-level-badge">
-            <i class="fas fa-seedling"></i> Эко Новичок
-          </div>
+    <!-- CHAT -->
+    <div id="pg-chat" class="page">
+      <div class="scroll">
+        <div class="chat-header-section">
+          <h2><i class="fas fa-comments"></i> Чаты EcoCity</h2>
+          <p>Жалобы, нарушения и поддержка</p>
         </div>
 
-        <!-- Stats Grid -->
+        <!-- Chat Templates -->
+        <div class="sec-title">📨 Быстрые обращения</div>
+        <div class="chat-templates">
+          <button class="chat-tmpl" onclick="openChat('complaint')">
+            <div class="ct-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+            <div><strong>Жалоба на коммунальщиков</strong><p>Не вывозят мусор, нарушения графика</p></div>
+            <i class="fas fa-chevron-right"></i>
+          </button>
+          <button class="chat-tmpl" onclick="openChat('violation')">
+            <div class="ct-icon orange"><i class="fas fa-ban"></i></div>
+            <div><strong>Нарушение выброса мусора</strong><p>Гражданин выбросил мусор не в том месте</p></div>
+            <i class="fas fa-chevron-right"></i>
+          </button>
+          <button class="chat-tmpl" onclick="openChat('support')">
+            <div class="ct-icon green"><i class="fas fa-headset"></i></div>
+            <div><strong>Связь с оператором</strong><p>Живой чат с сотрудником EcoCity</p></div>
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Competition Rating -->
+        <div class="sec-title">🏆 Конкурс месяца — Июнь 2026</div>
+        <div class="comp-tabs">
+          <button class="ctab active" onclick="switchComp('city',this)">Города</button>
+          <button class="ctab" onclick="switchComp('district',this)">Районы</button>
+          <button class="ctab" onclick="switchComp('street',this)">Улицы</button>
+          <button class="ctab" onclick="switchComp('activist',this)">Активисты</button>
+        </div>
+        <div id="comp-list"></div>
+
+        <!-- Monthly Stats -->
+        <div class="monthly-card">
+          <div class="mc-title"><i class="fas fa-calendar-alt"></i> Итоги за Июнь</div>
+          <div class="mc-stats">
+            <div class="mc-s"><span class="mc-n">12.4т</span><small>Собрано мусора</small></div>
+            <div class="mc-s"><span class="mc-n">2 840</span><small>Участников</small></div>
+            <div class="mc-s"><span class="mc-n">147</span><small>Жалоб решено</small></div>
+          </div>
+        </div>
+        <div style="height:80px"></div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="pg-profile" class="page">
+      <div class="scroll">
+        <div class="prof-header">
+          <div class="prof-av-wrap"><div class="prof-av" id="prof-av">ЭГ</div><button class="av-edit"><i class="fas fa-camera"></i></button></div>
+          <h2 id="prof-name">Эко Гражданин</h2>
+          <p id="prof-id-txt">ID: ECO-000000</p>
+          <div class="prof-lvl-tag" id="prof-lvl-tag">🌱 Эко Новичок</div>
+        </div>
         <div class="stats-grid">
-          <div class="stat-card green">
-            <i class="fas fa-trash-alt"></i>
-            <span class="stat-num" id="prof-bags">0</span>
-            <span class="stat-label">Пакетов</span>
-          </div>
-          <div class="stat-card gold">
-            <i class="fas fa-coins"></i>
-            <span class="stat-num" id="prof-coins">0</span>
-            <span class="stat-label">EcoCoin</span>
-          </div>
-          <div class="stat-card blue">
-            <i class="fas fa-star"></i>
-            <span class="stat-num" id="prof-level">1</span>
-            <span class="stat-label">Уровень</span>
-          </div>
-          <div class="stat-card purple">
-            <i class="fas fa-medal"></i>
-            <span class="stat-num" id="prof-rank">#1</span>
-            <span class="stat-label">Рейтинг</span>
-          </div>
+          <div class="sc green"><i class="fas fa-trash-alt"></i><span id="p-bags">0</span><small>Пакетов</small></div>
+          <div class="sc gold"><i class="fas fa-coins"></i><span id="p-coins">0</span><small>EcoCoin</small></div>
+          <div class="sc blue"><i class="fas fa-star"></i><span id="p-lvl">1</span><small>Уровень</small></div>
+          <div class="sc purple"><i class="fas fa-medal"></i><span id="p-rank">#5</span><small>Рейтинг</small></div>
+        </div>
+        <div class="prof-prog-card">
+          <div class="lv-row"><span id="p-lv-cur">Эко Новичок</span><span id="p-lv-nxt">→ Эко Помощник</span></div>
+          <div class="pbar"><div id="p-pbar" style="width:5%"></div></div>
+          <div class="lv-hint"><span id="p-xp">5</span> / <span id="p-xp-max">100</span> EcoCoin</div>
         </div>
 
-        <!-- Level Progress -->
-        <div class="profile-level-section">
-          <div class="level-header-row">
-            <span>Прогресс уровня</span>
-            <span id="prof-level-text">Эко Новичок</span>
-          </div>
-          <div class="progress-bar-wrap">
-            <div class="progress-bar" id="prof-progress" style="width:5%"></div>
-          </div>
-          <div class="level-xp"><span id="prof-xp">5</span> / <span id="prof-xp-max">100</span> EcoCoin</div>
+        <div class="sec-title">💎 Бонусы</div>
+        <div class="bonus-list">
+          <div class="bonus-item"><div class="bi-icon"><i class="fas fa-gift"></i></div><div><strong>Ежедневный бонус</strong><p>+10 EcoCoin за вход каждый день</p></div><button id="daily-btn" class="bi-btn" onclick="claimDaily()">Забрать</button></div>
+          <div class="bonus-item"><div class="bi-icon"><i class="fas fa-users"></i></div><div><strong>Реферальный</strong><p>+50 EcoCoin за приглашённого друга</p></div><button class="bi-btn" onclick="shareRef()">Пригласить</button></div>
+          <div class="bonus-item"><div class="bi-icon"><i class="fas fa-sort-amount-up"></i></div><div><strong>За сортировку</strong><p>+25 EcoCoin за раздельный сбор</p></div><button class="bi-btn" onclick="sortBonus()">Получить</button></div>
         </div>
 
-        <!-- Bonuses -->
-        <div class="section-title">💎 Бонусная система</div>
-        <div class="bonus-cards">
-          <div class="bonus-card">
-            <div class="bonus-icon"><i class="fas fa-gift"></i></div>
-            <div class="bonus-info">
-              <strong>Ежедневный бонус</strong>
-              <p>+10 EcoCoin за вход каждый день</p>
-            </div>
-            <button class="bonus-claim-btn" id="daily-bonus-btn" onclick="claimDaily()">Забрать</button>
-          </div>
-          <div class="bonus-card">
-            <div class="bonus-icon"><i class="fas fa-users"></i></div>
-            <div class="bonus-info">
-              <strong>Реферальный бонус</strong>
-              <p>+50 EcoCoin за каждого приглашённого</p>
-            </div>
-            <button class="bonus-claim-btn" onclick="showReferral()">Пригласить</button>
-          </div>
-          <div class="bonus-card">
-            <div class="bonus-icon"><i class="fas fa-recycle"></i></div>
-            <div class="bonus-info">
-              <strong>Сортировка мусора</strong>
-              <p>+25 EcoCoin за раздельный сбор</p>
-            </div>
-            <button class="bonus-claim-btn" onclick="showSortBonus()">Подробнее</button>
-          </div>
+        <div class="sec-title">🎁 Обмен EcoCoin</div>
+        <div class="redeem-row">
+          <div class="rd-card"><div class="rd-ico"><i class="fas fa-bus"></i></div><strong>Транспорт</strong><p>Бесплатный проезд</p><span class="rd-cost"><i class="fas fa-coins"></i> 200</span><button class="rd-btn" onclick="redeem('Проезд',200)">Обменять</button></div>
+          <div class="rd-card"><div class="rd-ico"><i class="fas fa-percent"></i></div><strong>Скидка 10%</strong><p>В магазинах</p><span class="rd-cost"><i class="fas fa-coins"></i> 150</span><button class="rd-btn" onclick="redeem('Скидка',150)">Обменять</button></div>
+          <div class="rd-card"><div class="rd-ico"><i class="fas fa-seedling"></i></div><strong>Дерево</strong><p>Посадить дерево</p><span class="rd-cost"><i class="fas fa-coins"></i> 500</span><button class="rd-btn" onclick="redeem('Дерево',500)">Обменять</button></div>
         </div>
 
-        <!-- Redeem -->
-        <div class="section-title">🎁 Обмен EcoCoin</div>
-        <div class="redeem-cards">
-          <div class="redeem-card">
-            <div class="redeem-img"><i class="fas fa-bus"></i></div>
-            <strong>Транспорт</strong>
-            <p>Бесплатный проезд</p>
-            <span class="redeem-price"><i class="fas fa-coins"></i> 200</span>
-            <button class="redeem-btn" onclick="redeemItem('Транспорт', 200)">Получить</button>
-          </div>
-          <div class="redeem-card">
-            <div class="redeem-img"><i class="fas fa-shopping-bag"></i></div>
-            <strong>Скидка 10%</strong>
-            <p>В партнёрских магазинах</p>
-            <span class="redeem-price"><i class="fas fa-coins"></i> 150</span>
-            <button class="redeem-btn" onclick="redeemItem('Скидка', 150)">Получить</button>
-          </div>
-          <div class="redeem-card">
-            <div class="redeem-img"><i class="fas fa-seedling"></i></div>
-            <strong>Посадить дерево</strong>
-            <p>Городская программа</p>
-            <span class="redeem-price"><i class="fas fa-coins"></i> 500</span>
-            <button class="redeem-btn" onclick="redeemItem('Дерево', 500)">Получить</button>
-          </div>
-        </div>
-
-        <!-- Settings -->
-        <div class="section-title">⚙️ Настройки</div>
-        <div class="settings-list">
-          <button class="settings-item" onclick="showEditProfile()">
-            <i class="fas fa-user-edit"></i><span>Редактировать профиль</span><i class="fas fa-chevron-right"></i>
-          </button>
-          <button class="settings-item" onclick="showNotifications()">
-            <i class="fas fa-bell"></i><span>Уведомления</span><i class="fas fa-chevron-right"></i>
-          </button>
-          <button class="settings-item" onclick="showLanguage()">
-            <i class="fas fa-globe"></i><span>Язык</span><i class="fas fa-chevron-right"></i>
-          </button>
-          <button class="settings-item" onclick="showAbout()">
-            <i class="fas fa-info-circle"></i><span>О приложении</span><i class="fas fa-chevron-right"></i>
-          </button>
-          <button class="settings-item logout" onclick="doLogout()">
-            <i class="fas fa-sign-out-alt"></i><span>Выйти из аккаунта</span><i class="fas fa-chevron-right"></i>
-          </button>
+        <div class="sec-title">⚙️ Настройки</div>
+        <div class="sett-list">
+          <button class="si"><i class="fas fa-user-edit"></i><span>Редактировать профиль</span><i class="fas fa-chevron-right"></i></button>
+          <button class="si" onclick="openModal('modal-notif')"><i class="fas fa-bell"></i><span>Уведомления</span><i class="fas fa-chevron-right"></i></button>
+          <button class="si red" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i><span>Выйти</span><i class="fas fa-chevron-right"></i></button>
         </div>
         <div style="height:80px"></div>
       </div>
     </div>
   </div>
 
-  <!-- Bottom Navigation -->
+  <!-- BOTTOM NAV (5 tabs) -->
   <nav class="bottom-nav">
-    <button class="nav-btn active" id="nav-news" onclick="switchPage('news')">
-      <i class="fas fa-newspaper"></i>
-      <span>Новости</span>
-    </button>
-    <button class="nav-btn" id="nav-map" onclick="switchPage('map')">
-      <i class="fas fa-map-marked-alt"></i>
-      <span>Карта</span>
-    </button>
-    <button class="nav-btn qr-nav" id="nav-qr" onclick="switchPage('qr')">
-      <div class="qr-fab"><i class="fas fa-qrcode"></i></div>
-      <span>QR-код</span>
-    </button>
-    <button class="nav-btn" id="nav-profile" onclick="switchPage('profile')">
-      <i class="fas fa-user-circle"></i>
-      <span>Профиль</span>
-    </button>
+    <button class="nb active" id="nb-news" onclick="goPage('news')"><i class="fas fa-newspaper"></i><span>Новости</span></button>
+    <button class="nb" id="nb-map" onclick="goPage('map')"><i class="fas fa-map-marked-alt"></i><span>Карта</span></button>
+    <button class="nb nb-qr" id="nb-qr" onclick="goPage('qr')"><div class="qr-fab-btn"><i class="fas fa-qrcode"></i></div><span>QR</span></button>
+    <button class="nb" id="nb-chat" onclick="goPage('chat')"><i class="fas fa-comments"></i><span>Чаты</span></button>
+    <button class="nb" id="nb-profile" onclick="goPage('profile')"><i class="fas fa-user-circle"></i><span>Профиль</span></button>
   </nav>
 </div>
 
-<!-- ========== MODALS ========== -->
-<!-- Notification Modal -->
-<div id="modal-notifications" class="modal-overlay hidden" onclick="closeModal('modal-notifications')">
+<!-- MODALS -->
+<div id="modal-notif" class="modal-ov hidden" onclick="closeModal('modal-notif')">
   <div class="modal-box" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <h3><i class="fas fa-bell"></i> Уведомления</h3>
-      <button class="modal-close" onclick="closeModal('modal-notifications')"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body" id="notifications-list"></div>
+    <div class="modal-hdr"><h3><i class="fas fa-bell"></i> Уведомления</h3><button onclick="closeModal('modal-notif')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body" id="notif-body"></div>
   </div>
 </div>
 
-<!-- Leaderboard Modal -->
-<div id="modal-leaderboard" class="modal-overlay hidden" onclick="closeModal('modal-leaderboard')">
+<div id="modal-lb" class="modal-ov hidden" onclick="closeModal('modal-lb')">
   <div class="modal-box" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <h3><i class="fas fa-trophy"></i> Рейтинг EcoCity</h3>
-      <button class="modal-close" onclick="closeModal('modal-leaderboard')"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body">
-      <div class="leaderboard-tabs">
-        <button class="lb-tab active" onclick="switchLB('week')">Неделя</button>
-        <button class="lb-tab" onclick="switchLB('month')">Месяц</button>
-        <button class="lb-tab" onclick="switchLB('all')">Всё время</button>
-      </div>
-      <div id="leaderboard-list"></div>
-    </div>
+    <div class="modal-hdr"><h3><i class="fas fa-trophy"></i> Рейтинг EcoCity</h3><button onclick="closeModal('modal-lb')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body" id="lb-body"></div>
   </div>
 </div>
 
-<!-- Toast Notification -->
+<div id="modal-chat" class="modal-ov hidden" onclick="closeModal('modal-chat')">
+  <div class="modal-box tall" onclick="event.stopPropagation()">
+    <div class="modal-hdr"><h3 id="chat-modal-title">Чат</h3><button onclick="closeModal('modal-chat')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body" id="chat-modal-body"></div>
+  </div>
+</div>
+
 <div id="toast" class="toast hidden"></div>
+<canvas id="confetti" class="confetti-cv"></canvas>
 
-<!-- Confetti -->
-<canvas id="confetti-canvas" class="confetti-canvas"></canvas>
-
-<!-- Scripts -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="js/data.js"></script>
+<script src="js/qrgen.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>
