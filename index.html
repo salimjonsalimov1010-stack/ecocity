@@ -211,52 +211,220 @@
     <div id="pg-map" class="page">
       <div class="map-info-bar">
         <i class="fas fa-info-circle"></i>
-        <span><b>А</b> = Вы · <b>Б,В,Г</b> = Точки сбора мусора · Нажмите на точку → маршрут</span>
+        <span><b>А</b> = Вы · <b>Б,В,Г</b> = Точки сбора · Нажмите на точку → маршрут + расстояние</span>
       </div>
-      <div class="demo-map" id="demo-map">
-        <!-- Streets -->
-        <div class="street h" style="top:45%;left:0;right:0"></div>
-        <div class="street h" style="top:25%;left:0;right:0"></div>
-        <div class="street h" style="top:70%;left:0;right:0"></div>
-        <div class="street v" style="left:20%;top:0;bottom:0"></div>
-        <div class="street v" style="left:50%;top:0;bottom:0"></div>
-        <div class="street v" style="left:75%;top:0;bottom:0"></div>
-        <!-- Buildings -->
-        <div class="block" style="top:28%;left:22%;width:26%;height:15%"></div>
-        <div class="block" style="top:28%;left:52%;width:21%;height:15%"></div>
-        <div class="block" style="top:48%;left:22%;width:26%;height:20%"></div>
-        <div class="block" style="top:48%;left:52%;width:21%;height:20%"></div>
-        <div class="block" style="top:5%;left:22%;width:26%;height:18%"></div>
-        <div class="block" style="top:73%;left:22%;width:26%;height:20%"></div>
-        <div class="block" style="top:73%;left:52%;width:21%;height:20%"></div>
-        <!-- Route SVG -->
-        <svg id="route-svg" class="route-svg"></svg>
-        <!-- Markers -->
-        <div class="map-marker user" style="left:50%;top:45%" title="А — Вы здесь">
-          <div class="mm-circle green pulse"><span>А</span></div>
-          <div class="mm-label">Вы</div>
-        </div>
-        <div class="map-marker trash" style="left:20%;top:25%" onclick="selectPoint('Б',20,25,420)" title="Б — Точка сбора">
-          <div class="mm-circle orange"><span>Б</span></div>
-          <div class="mm-label">Пункт Б</div>
-        </div>
-        <div class="map-marker trash" style="left:75%;top:30%" onclick="selectPoint('В',75,30,680)" title="В — Точка сбора">
-          <div class="mm-circle orange"><span>В</span></div>
-          <div class="mm-label">Пункт В</div>
-        </div>
-        <div class="map-marker trash" style="left:20%;top:70%" onclick="selectPoint('Г',20,70,310)" title="Г — Точка сбора">
-          <div class="mm-circle orange"><span>Г</span></div>
-          <div class="mm-label">Пункт Г</div>
-        </div>
+
+      <!-- SVG City Map -->
+      <div class="city-map-wrap" id="city-map-wrap">
+        <svg id="city-svg" viewBox="0 0 400 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;">
+
+          <!-- Background -->
+          <rect width="400" height="520" fill="#e8efe0"/>
+
+          <!-- Parks / Green zones -->
+          <rect x="30" y="30" width="80" height="55" rx="6" fill="#b8d4a0"/>
+          <rect x="32" y="32" width="76" height="51" rx="4" fill="#c4dc9c"/>
+          <text x="70" y="60" font-size="8" fill="#4a7a20" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600">Парк Рудаки</text>
+          <circle cx="50" cy="50" r="4" fill="#5a9a30"/>
+          <circle cx="70" cy="48" r="5" fill="#4a8a28"/>
+          <circle cx="90" cy="52" r="4" fill="#5a9a30"/>
+          <circle cx="60" cy="70" r="3" fill="#5a9a30"/>
+          <circle cx="85" cy="68" r="4" fill="#4a8a28"/>
+
+          <rect x="280" y="340" width="90" height="70" rx="6" fill="#b8d4a0"/>
+          <rect x="282" y="342" width="86" height="66" rx="4" fill="#c4dc9c"/>
+          <text x="325" y="377" font-size="8" fill="#4a7a20" text-anchor="middle" font-family="Inter,sans-serif" font-weight="600">Парк Айни</text>
+          <circle cx="300" cy="365" r="4" fill="#5a9a30"/>
+          <circle cx="325" cy="360" r="5" fill="#4a8a28"/>
+          <circle cx="350" cy="368" r="4" fill="#5a9a30"/>
+
+          <!-- River -->
+          <path d="M0,460 Q100,450 200,455 Q300,460 400,452" stroke="#7ab8d0" stroke-width="14" fill="none" opacity="0.7"/>
+          <path d="M0,460 Q100,450 200,455 Q300,460 400,452" stroke="#a0d0e8" stroke-width="8" fill="none" opacity="0.5"/>
+          <text x="200" y="458" font-size="7" fill="#2980b9" text-anchor="middle" font-family="Inter,sans-serif">р. Варзоб</text>
+
+          <!-- Main roads (wide) -->
+          <!-- пр. Рудаки vertical -->
+          <rect x="155" y="0" width="22" height="520" fill="#d8d0b8"/>
+          <rect x="158" y="0" width="16" height="520" fill="#e0d8c0"/>
+          <!-- ул. Айни horizontal -->
+          <rect x="0" y="218" width="400" height="20" fill="#d8d0b8"/>
+          <rect x="0" y="221" width="400" height="14" fill="#e0d8c0"/>
+          <!-- ул. Борбад horizontal -->
+          <rect x="0" y="320" width="400" height="16" fill="#d8d0b8"/>
+          <rect x="0" y="322" width="400" height="12" fill="#e0d8c0"/>
+          <!-- ул. Дусти vertical -->
+          <rect x="78" y="0" width="16" height="520" fill="#d0c8b0"/>
+          <rect x="80" y="0" width="12" height="520" fill="#dcd4b8"/>
+          <!-- ул. Фирдавси vertical -->
+          <rect x="258" y="0" width="16" height="520" fill="#d0c8b0"/>
+          <rect x="260" y="0" width="12" height="520" fill="#dcd4b8"/>
+
+          <!-- Secondary roads -->
+          <rect x="0" y="120" width="400" height="10" fill="#d4ccb4"/>
+          <rect x="0" y="390" width="400" height="10" fill="#d4ccb4"/>
+          <rect x="0" y="290" width="155" height="8" fill="#d4ccb4"/>
+          <rect x="177" y="290" width="223" height="8" fill="#d4ccb4"/>
+
+          <!-- Road center lines -->
+          <line x1="166" y1="0" x2="166" y2="210" stroke="#f0e890" stroke-width="1" stroke-dasharray="12,8" opacity="0.7"/>
+          <line x1="166" y1="238" x2="166" y2="310" stroke="#f0e890" stroke-width="1" stroke-dasharray="12,8" opacity="0.7"/>
+          <line x1="166" y1="338" x2="166" y2="445" stroke="#f0e890" stroke-width="1" stroke-dasharray="12,8" opacity="0.7"/>
+          <line x1="0" y1="228" x2="155" y2="228" stroke="#f0e890" stroke-width="1" stroke-dasharray="10,7" opacity="0.6"/>
+          <line x1="177" y1="228" x2="400" y2="228" stroke="#f0e890" stroke-width="1" stroke-dasharray="10,7" opacity="0.6"/>
+
+          <!-- Road labels -->
+          <text x="166" y="108" font-size="7" fill="#887060" text-anchor="middle" font-family="Inter,sans-serif" transform="rotate(-90,166,108)">пр. Рудаки</text>
+          <text x="80" y="200" font-size="6.5" fill="#887060" text-anchor="middle" font-family="Inter,sans-serif" transform="rotate(-90,80,200)">ул. Дусти</text>
+          <text x="266" y="200" font-size="6.5" fill="#887060" text-anchor="middle" font-family="Inter,sans-serif" transform="rotate(-90,266,200)">ул. Фирдавси</text>
+          <text x="60" y="215" font-size="6.5" fill="#887060" text-anchor="start" font-family="Inter,sans-serif">ул. Айни</text>
+          <text x="60" y="317" font-size="6.5" fill="#887060" text-anchor="start" font-family="Inter,sans-serif">ул. Борбад</text>
+
+          <!-- Buildings block 1 (top-left) -->
+          <rect x="20" y="100" width="54" height="35" rx="3" fill="#c8b89c" stroke="#b0a088" stroke-width="0.5"/>
+          <rect x="22" y="102" width="50" height="31" rx="2" fill="#d4c4a8"/>
+          <rect x="20" y="135" width="25" height="20" rx="2" fill="#c0b090" stroke="#b0a080" stroke-width="0.5"/>
+          <rect x="50" y="138" width="24" height="17" rx="2" fill="#c8b898"/>
+
+          <!-- Buildings block 2 (top-right of Rudaki) -->
+          <rect x="185" y="30" width="65" height="40" rx="3" fill="#bac4d0" stroke="#a8b4c0" stroke-width="0.5"/>
+          <rect x="187" y="32" width="61" height="36" rx="2" fill="#c8d4e0"/>
+          <text x="217" y="54" font-size="6" fill="#506070" text-anchor="middle" font-family="Inter,sans-serif">Хукумат</text>
+          <rect x="185" y="75" width="30" height="40" rx="2" fill="#c0cad6"/>
+          <rect x="220" y="78" width="30" height="37" rx="2" fill="#bac4d0"/>
+
+          <!-- Buildings block 3 (mid-left between Дусти and Рудаки) -->
+          <rect x="96" y="135" width="54" height="78" rx="3" fill="#c8b89c" stroke="#b0a088" stroke-width="0.5"/>
+          <rect x="98" y="137" width="50" height="74" rx="2" fill="#d0c0a4"/>
+          <rect x="100" y="150" width="15" height="8" rx="1" fill="#b8a888" opacity="0.6"/>
+          <rect x="120" y="150" width="15" height="8" rx="1" fill="#b8a888" opacity="0.6"/>
+          <rect x="100" y="165" width="15" height="8" rx="1" fill="#b8a888" opacity="0.6"/>
+          <rect x="120" y="165" width="15" height="8" rx="1" fill="#b8a888" opacity="0.6"/>
+          <rect x="100" y="180" width="15" height="8" rx="1" fill="#b8a888" opacity="0.6"/>
+          <rect x="120" y="180" width="15" height="8" rx="1" fill="#b8a888" opacity="0.6"/>
+
+          <!-- Buildings mid-right -->
+          <rect x="185" y="130" width="68" height="82" rx="3" fill="#c4d0c0" stroke="#b0c0ac" stroke-width="0.5"/>
+          <rect x="187" y="132" width="64" height="78" rx="2" fill="#ccd8c8"/>
+          <rect x="192" y="145" width="16" height="10" rx="1" fill="#a8b8a4" opacity="0.6"/>
+          <rect x="216" y="145" width="16" height="10" rx="1" fill="#a8b8a4" opacity="0.6"/>
+          <rect x="192" y="162" width="16" height="10" rx="1" fill="#a8b8a4" opacity="0.6"/>
+          <rect x="216" y="162" width="16" height="10" rx="1" fill="#a8b8a4" opacity="0.6"/>
+          <rect x="192" y="179" width="16" height="10" rx="1" fill="#a8b8a4" opacity="0.6"/>
+          <rect x="216" y="179" width="16" height="10" rx="1" fill="#a8b8a4" opacity="0.6"/>
+
+          <!-- Buildings right column -->
+          <rect x="280" y="40" width="55" height="45" rx="3" fill="#c8c0d0" stroke="#b8b0c0" stroke-width="0.5"/>
+          <rect x="282" y="42" width="51" height="41" rx="2" fill="#d4ccd8"/>
+          <rect x="280" y="90" width="55" height="50" rx="3" fill="#c0c8d4"/>
+          <rect x="282" y="92" width="51" height="46" rx="2" fill="#ccd4e0"/>
+          <rect x="345" y="40" width="40" height="100" rx="3" fill="#c8c0b8"/>
+          <rect x="347" y="42" width="36" height="96" rx="2" fill="#d0c8c0"/>
+
+          <!-- Buildings between Айни and Борбад -->
+          <rect x="20" y="240" width="54" height="74" rx="3" fill="#c8b498" stroke="#b8a488" stroke-width="0.5"/>
+          <rect x="22" y="242" width="50" height="70" rx="2" fill="#d4c0a4"/>
+          <rect x="96" y="240" width="54" height="74" rx="3" fill="#c0b8a8"/>
+          <rect x="185" y="240" width="68" height="74" rx="3" fill="#c4bcb0" stroke="#b4aca0" stroke-width="0.5"/>
+          <rect x="187" y="242" width="64" height="70" rx="2" fill="#ccc4b8"/>
+          <text x="219" y="280" font-size="6.5" fill="#706860" text-anchor="middle" font-family="Inter,sans-serif">Базар</text>
+          <rect x="280" y="240" width="55" height="74" rx="3" fill="#bcc4c0"/>
+          <rect x="345" y="240" width="40" height="74" rx="3" fill="#c0bcb4"/>
+
+          <!-- Buildings between Борбад and river -->
+          <rect x="20" y="338" width="54" height="44" rx="3" fill="#c4bca8"/>
+          <rect x="96" y="338" width="54" height="44" rx="3" fill="#c8c0ac"/>
+          <rect x="185" y="338" width="68" height="44" rx="3" fill="#bcbcb8"/>
+          <rect x="345" y="338" width="40" height="44" rx="3" fill="#c0b8ac"/>
+
+          <!-- Schools/POI -->
+          <rect x="185" y="390" width="68" height="56" rx="3" fill="#d4c8a0" stroke="#c4b890" stroke-width="0.5"/>
+          <text x="219" y="420" font-size="6.5" fill="#706030" text-anchor="middle" font-family="Inter,sans-serif">Школа №5</text>
+          <rect x="20" y="390" width="54" height="56" rx="3" fill="#c8d4c0"/>
+          <text x="47" y="420" font-size="6" fill="#406030" text-anchor="middle" font-family="Inter,sans-serif">Больница</text>
+
+          <!-- Route path (hidden by default) -->
+          <path id="svg-route" d="" stroke="#1a6b3c" stroke-width="3.5" fill="none"
+            stroke-dasharray="10,5" opacity="0.9" stroke-linecap="round"
+            marker-end="url(#arrowhead)" style="display:none"/>
+          <defs>
+            <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L8,3 z" fill="#1a6b3c"/>
+            </marker>
+            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+            </filter>
+          </defs>
+
+          <!-- MARKER А — User location (center, on Rudaki) -->
+          <g id="marker-a" transform="translate(166,228)" filter="url(#shadow)">
+            <circle cx="0" cy="0" r="18" fill="#27ae60" opacity="0.2">
+              <animate attributeName="r" values="16;22;16" dur="2s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.3;0;0.3" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="0" cy="0" r="14" fill="#27ae60" stroke="white" stroke-width="2.5"/>
+            <text x="0" y="5" font-size="11" fill="white" text-anchor="middle" font-family="Inter,sans-serif" font-weight="900">А</text>
+          </g>
+          <rect x="142" y="247" width="48" height="14" rx="7" fill="white" opacity="0.9"/>
+          <text x="166" y="257" font-size="7.5" fill="#1a6b3c" text-anchor="middle" font-family="Inter,sans-serif" font-weight="700">📍 Вы здесь</text>
+
+          <!-- MARKER Б — Trash point top-left (near park) -->
+          <g id="marker-b" transform="translate(47,155)" filter="url(#shadow)" onclick="selectPoint('Б',47,155,380,'пр. Дусти, 8','Пластик, Стекло, Бумага')" style="cursor:pointer">
+            <circle cx="0" cy="0" r="15" fill="#e67e22" stroke="white" stroke-width="2.5"/>
+            <text x="0" y="5" font-size="11" fill="white" text-anchor="middle" font-family="Inter,sans-serif" font-weight="900">Б</text>
+          </g>
+          <rect x="22" y="174" width="50" height="13" rx="6" fill="white" opacity="0.9"/>
+          <text x="47" y="183" font-size="7" fill="#c05010" text-anchor="middle" font-family="Inter,sans-serif" font-weight="700">🗑️ Пункт Б</text>
+
+          <!-- MARKER В — Trash point top-right -->
+          <g id="marker-v" transform="translate(320,165)" filter="url(#shadow)" onclick="selectPoint('В',320,165,620,'ул. Фирдавси, 22','Металл, Электроника')" style="cursor:pointer">
+            <circle cx="0" cy="0" r="15" fill="#e67e22" stroke="white" stroke-width="2.5"/>
+            <text x="0" y="5" font-size="11" fill="white" text-anchor="middle" font-family="Inter,sans-serif" font-weight="900">В</text>
+          </g>
+          <rect x="295" y="184" width="50" height="13" rx="6" fill="white" opacity="0.9"/>
+          <text x="320" y="193" font-size="7" fill="#c05010" text-anchor="middle" font-family="Inter,sans-serif" font-weight="700">🗑️ Пункт В</text>
+
+          <!-- MARKER Г — Trash point bottom (near river) -->
+          <g id="marker-g" transform="translate(130,385)" filter="url(#shadow)" onclick="selectPoint('Г',130,385,290,'ул. Айни, 45','Все виды отходов')" style="cursor:pointer">
+            <circle cx="0" cy="0" r="15" fill="#e67e22" stroke="white" stroke-width="2.5"/>
+            <text x="0" y="5" font-size="11" fill="white" text-anchor="middle" font-family="Inter,sans-serif" font-weight="900">Г</text>
+          </g>
+          <rect x="105" y="404" width="50" height="13" rx="6" fill="white" opacity="0.9"/>
+          <text x="130" y="413" font-size="7" fill="#c05010" text-anchor="middle" font-family="Inter,sans-serif" font-weight="700">🗑️ Пункт Г</text>
+
+          <!-- Compass -->
+          <g transform="translate(370,30)">
+            <circle cx="0" cy="0" r="14" fill="white" opacity="0.9"/>
+            <text x="0" y="-4" font-size="7" fill="#e74c3c" text-anchor="middle" font-weight="900" font-family="Inter,sans-serif">С</text>
+            <text x="0" y="9" font-size="6" fill="#888" text-anchor="middle" font-family="Inter,sans-serif">Ю</text>
+            <line x1="0" y1="-10" x2="0" y2="10" stroke="#ddd" stroke-width="0.5"/>
+          </g>
+
+          <!-- Scale -->
+          <g transform="translate(20,490)">
+            <line x1="0" y1="0" x2="60" y2="0" stroke="#888" stroke-width="1.5"/>
+            <line x1="0" y1="-3" x2="0" y2="3" stroke="#888" stroke-width="1.5"/>
+            <line x1="60" y1="-3" x2="60" y2="3" stroke="#888" stroke-width="1.5"/>
+            <text x="30" y="-5" font-size="6.5" fill="#666" text-anchor="middle" font-family="Inter,sans-serif">500 м</text>
+          </g>
+
+          <!-- Map title -->
+          <rect x="95" y="490" width="210" height="20" rx="10" fill="white" opacity="0.85"/>
+          <text x="200" y="504" font-size="8" fill="#1a6b3c" text-anchor="middle" font-family="Inter,sans-serif" font-weight="700">🗺️ Душанбе — Демо карта EcoCity</text>
+        </svg>
       </div>
+
       <div class="map-legend-bar">
-        <span><span class="ld green"></span>А — Вы</span>
-        <span><span class="ld orange"></span>Б,В,Г — Сбор мусора</span>
+        <span><span class="ld green"></span><b>А</b> — Вы</span>
+        <span><span class="ld orange"></span><b>Б,В,Г</b> — Точки сбора мусора</span>
+        <span style="font-size:10px;color:#888">Нажмите на точку</span>
       </div>
       <div id="map-panel" class="map-panel hidden">
         <div class="mp-handle"></div>
         <div id="mp-content"></div>
-        <button class="btn-route" id="btn-route"><i class="fas fa-route"></i> Маршрут построен</button>
+        <button class="btn-route" id="btn-route" onclick="document.getElementById('map-panel').classList.add('hidden')">
+          <i class="fas fa-check-circle"></i> Маршрут показан на карте
+        </button>
       </div>
     </div>
 
